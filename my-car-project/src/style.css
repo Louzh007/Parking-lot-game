@@ -1,0 +1,696 @@
+* {
+  padding: 0;
+  margin: 0;
+}
+body {
+  width: 100vw;
+  height: 100vh;
+  background-color: rgb(0, 0, 0);
+  /* background-color: #dedede; */
+  /* 创建背景渐变颜色 */
+  background: linear-gradient(180deg, #435362 30%, #0e0e0e 100%);
+  overflow: hidden; /*  no scroll，禁用滚动条  */
+}
+body,
+div,
+dl,
+dt,
+dd,
+ul,
+ol,
+li,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+pre,
+form,
+fieldset,
+legend,
+input,
+textarea,
+button,
+p,
+blockquote,
+th,
+td {
+  margin: 0;
+  padding: 0;
+}
+li {
+  list-style-type: none;
+}
+a {
+  text-decoration: none;
+}
+img,
+input,
+button {
+  /* 清除默认图片的边框 */
+  border: none;
+  vertical-align: middle;
+}
+canvas {
+  display: block;
+  position: flex;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  /* 3d 画布往上移动一部分 */
+  /* transform: translateY(-100px);  */
+}
+button {
+  /* 清除默认button 的背景、边框、阴影*/
+  background: none;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  margin: 0;
+}
+.logo {
+  position: fixed;
+  height: 32px;
+  width: 183px;
+  left: 50px;
+  top: 26px;
+  z-index: 999;
+}
+.logo img {
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+}
+#Control_f {
+  position: fixed;
+  width: 120px;
+  height: 80px;
+  left: 110px;
+  bottom: 60px;
+  z-index: 1000; /* 确保按钮在3D画布上方 */
+  display: flex; /* 新增 */
+  flex-direction: column;
+  align-items: center; /* 右侧对齐 */
+}
+.Control_s {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  gap: 8px; /* 替换 margin 为更现代的间距控制 */
+  margin: 6px 0; /* 保留垂直间距 */
+}
+.Direction_Control {
+  /* 移除按钮默认样式 */
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  /* margin: 4px; */
+  cursor: pointer;
+  /* position:fixed ; */
+  font-size: 18px;
+  color: #ffffff64;
+  text-align: center;
+  line-height: 40px;
+}
+.Direction_Control:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: scale(1.02);
+}
+.Direction_Control:active {
+  background: rgba(255, 255, 255, 0.35);
+  transform: scale(0.98);
+  /* color: rgb(95, 255, 178); */
+  /* border: 1.5px solid rgba(95, 255, 178, 0.6); */
+  color: var(--active-color, rgb(95, 255, 178));
+  border: var(--active-border, 1.5px solid rgba(95, 255, 178, 0.6));
+}
+.Direction_Control.button-active {
+  /* 新增.button-active是为了在main.js中添加active状态,伪类:active没法在js中添加 */
+  background: rgba(255, 255, 255, 0.35);
+  transform: scale(0.98);
+  color: rgb(95, 255, 178);
+  border: 1.5px solid rgba(95, 255, 178, 0.6);
+}
+.Direction_Control.button-active2 {
+  /* 新增.button-active是为了在main.js中添加active状态,伪类:active没法在js中添加 */
+  background: rgba(255, 255, 255, 0.35);
+  transform: scale(0.98);
+  color: rgb(255, 194, 39);
+  border: 1.5px solid rgba(255, 194, 39, 0.8);
+}
+.door-tip {
+  display: none;
+  position: absolute;
+  background: rgba(0, 0, 0, 0.64);
+  font-size: 12px;
+  color: #ffffff;
+  padding-left: 10px;
+  padding-right: 10px;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  border: 1px solid rgb(255, 255, 255);
+  border-radius: 4px;
+  z-index: 1001; /* 确保按钮在3D画布上方 */
+}
+.Camera_Control_f {
+  list-style-type: none; /* 移除默认ul列表样式 */
+  padding-left: 0;
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 60px;
+  width: 600px;
+  height: 41px;
+  /* display: flex; */
+  flex-direction: row;
+  align-items: flex-end;
+  z-index: 999; /* 确保按钮在3D画布上方 */
+  display: none;
+}
+.Camera_Control_f.active {
+  /* display: block; */
+  display: flex;
+}
+.Camera_Control {
+  /* 移除按钮阴影 */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 14px;
+  font-weight: 300;
+  background: #7e7e7e00;
+  width: 200px;
+  height: 40px;
+  padding-top: 4px;
+  border-bottom: rgba(255, 255, 255, 0.3) 1px solid;
+}
+.Camera_Control:hover {
+  border-bottom: rgba(255, 255, 255, 0.8) 1px solid;
+  color: rgba(255, 255, 255, 0.8);
+}
+.Camera_Control.active {
+  border-bottom: rgb(95, 255, 178) 3px solid;
+  color: rgb(95, 255, 178);
+  font-weight: 500;
+}
+.Camera_Control.active2 {
+  border-bottom: rgb(255, 194, 39) 3px solid;
+  color: rgb(255, 194, 39);
+  font-weight: 500;
+}
+.banner_f {
+  position: fixed;
+  top: 12%;
+  left: 48%;
+  transform: translateX(-50%);
+  z-index: 5;
+  display: flex;
+  flex-direction: row;
+  width: 800px;
+}
+.banner_s {
+  display: none;
+}
+.banner_s img {
+  width: 1000px;
+  background-size: cover;
+  background-position: center;
+}
+#left_light_img {
+  position: fixed;
+  left: 10%;
+  top: 46%;
+  width: 13%;
+  background-size: cover;
+  opacity: 0%;
+}
+#right_light_img {
+  position: fixed;
+  right: 10%;
+  top: 46%;
+  width: 13%;
+  background-size: cover;
+  opacity: 0%;
+}
+#left_light_u_img {
+  position: fixed;
+  left: 10%;
+  top: 46%;
+  width: 13%;
+  background-size: cover;
+  opacity: 0%;
+}
+#right_light_u_img {
+  position: fixed;
+  right: 10%;
+  top: 46%;
+  width: 13%;
+  background-size: cover;
+  opacity: 0%;
+}
+/* 添加发光滤镜增强科技感 */
+#left_light_img,
+#right_light_img,
+#left_light_u_img,
+#right_light_u_img {
+  filter: drop-shadow(0 0 5px rgba(29, 255, 255, 0.2)) brightness(1.1);
+  transition:
+    filter 0.3s ease-out,
+    transform 0.3s ease-out,
+    opacity 0.3s ease-out;
+}
+
+.modelselect_f {
+  position: absolute;
+  top: 28px;
+  right: 220px;
+  z-index: 997;
+  display: flex;
+  flex-direction: row-reverse;
+}
+.modelselect_s {
+  width: 190px;
+  height: 56px;
+  display: block;
+}
+.modelselect_s.active {
+  display: none; /* 激活时隐藏 */
+}
+.modelselect_s div {
+  width: 190px;
+  height: 56px;
+}
+.modelselect_su7 {
+  background: url(/image/su7_select_normal.png) no-repeat center;
+  background-size: contain; /* 关键修改：从 cover 改成 contain */
+}
+/* 创建伪元素承载悬停状态 */
+.modelselect_su7::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: url(/image/su7_select_hover.png) no-repeat center;
+  background-size: contain; /* 关键修改：从 cover 改成 contain */
+  opacity: 0; /* 默认完全透明 */
+  transition: opacity 0.5s ease-in-out; /* 添加过渡效果 */
+  z-index: 1;
+}
+/* 悬停时显示伪元素 */
+.modelselect_su7:hover::after {
+  opacity: 1; /* 完全不透明 */
+}
+.modelselect_su7U {
+  background: url(/image/su7U_select_normal.png) no-repeat center;
+  background-size: contain; /* 关键修改：从 cover 改成 contain */
+}
+/* 创建伪元素承载悬停状态 */
+.modelselect_su7U::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: url(/image/su7U_select_hover.png) no-repeat center;
+  background-size: contain; /* 关键修改：从 cover 改成 contain */
+  opacity: 0; /* 默认完全透明 */
+  transition: opacity 0.5s ease-in-out; /* 添加过渡效果 */
+  z-index: 1;
+}
+/* 悬停时显示伪元素 */
+.modelselect_su7U:hover::after {
+  opacity: 1; /* 完全不透明 */
+}
+.colorselect_f {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-60%);
+  right: 5%;
+  z-index: 998;
+  display: none;
+}
+.colorselect_f.active {
+  display: block;
+}
+.colorselect_s {
+  padding: 10px;
+  margin: 6px;
+}
+.colorselect_s.active {
+  background: rgba(193, 202, 202, 0.1);
+  /* border: rgba(255, 255, 255, 0.3) 2px solid; */
+  border-radius: 50%;
+}
+.colorselect_s div {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+}
+
+/* 添加转场视频样式 */
+.guochang-video {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 9999;
+  background: black;
+  display: none;
+  justify-content: center;
+  align-items: center;
+}
+.fullscreen-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 添加淡出效果 */
+/* .ui-element {
+  transition: opacity 0.1s ease-out;
+} */
+#loading_bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  /* background: #ff5858; */
+  background: linear-gradient(180deg, #435362 30%, #0e0e0e 100%);
+  z-index: 9999;
+}
+
+#loading_f {
+  position: absolute;
+  width: 340px;
+  height: 125px;
+  left: 50%;
+  top: 45%;
+  transform: translate(-50%, -50%);
+}
+
+#loading_png {
+  position: absolute;
+  /* background: url(/image/sprite2.png) no-repeat; */
+  transform-origin: 50 0; /* 关键：将原点切换到右上角 */
+  transform: scaleX(-0.5) /* 水平翻转并缩放 */ scaleY(0.5) /* 水平翻转并缩放 */
+    translate(50%, -50%);
+}
+
+#loading_progress {
+  position: absolute;
+  left: 51%;
+  top: 55%;
+  transform: translate(-50%, -50%);
+  width: 200px;
+  height: 8px;
+  /* padding: 2px; */
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+}
+
+.progress_bar {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  height: 4px;
+  width: 0px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, #77a7d8 0%, #b0ddff 100%);
+  transition: width 0.3s ease;
+}
+
+@keyframes rotate-border {
+  from {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+.parking-button-wrapper {
+  position: fixed;
+  top: 28px;
+  right: 36px;
+  z-index: 1500;
+  display: inline-flex;
+  padding: 1px; /* 增加一点内边距给描边空间 */
+  min-width: 170px; /* 给一个保底宽度 */
+  justify-content: center;
+  align-items: center;
+  gap: 10px; /* 列间距 */
+  border-radius: 6px; /* 略大于内部按钮的 4px */
+  overflow: hidden;
+  /* background: #000; */
+  cursor: pointer;
+  box-shadow: 0 0 10px 0 rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+.parking-button-wrapper::before {
+  content: "";
+  position: absolute;
+  width: 160%;
+  height: 300%; /* 比容器大，保证边角也扫到 */
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(0deg);
+  /* 只有一小段弧是亮色 → 光斑效果 */
+  background: conic-gradient(
+    from 0deg,
+    transparent 20deg,
+    rgba(255, 255, 255, 1) 60deg,
+    transparent 100deg,
+    transparent 200deg,
+    rgba(255, 255, 255, 1) 240deg,
+    transparent 280deg,
+    transparent 360deg
+  );
+  animation: rotate-border 4s linear infinite;
+  transform-origin: center;
+}
+
+.parking-button-wrapper:hover::before {
+  animation-duration: 2s; /* 悬停时旋转加快 */
+}
+
+.parking-button-wrapper:hover {
+  box-shadow: 0 0 20px 0 rgba(255, 221, 204, 0.6);
+}
+.parking-button-bg {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  padding: 8px 8px;
+  background: #383b40;
+  justify-content: center;
+  align-items: center;
+  border-radius: 4px;
+}
+.parking-button-inner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  padding: 10px 32px;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  border-radius: 4px;
+  background: linear-gradient(180deg, #0a0909 0%, #1f0909 100%);
+  box-shadow:
+    0 2px 2px -0.8px rgba(249, 132, 43, 0.15) inset,
+    0 -6px 6px -2px rgba(255, 255, 255, 0.3) inset,
+    0 -12px 8px -2.5px #e28b43 inset,
+    0 -24px 18px -9px #ff7300 inset;
+  /* 1. 设置文字背景为渐变色 */
+  background-image: linear-gradient(180deg, #fff 50%, rgb(255, 234, 212) 80%);
+  /* 2. 关键：将背景裁剪到文字区域 */
+  -webkit-background-clip: text; /* Safari/Chrome 兼容 */
+  background-clip: text; /* 标准属性 */
+  /* 3. 将文字颜色设为透明，从而透出背景渐变 */
+  color: transparent;
+  border: none;
+  font-family: "Segoe UI", sans-serif;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+.parking-button-inner:hover {
+  color: #ffe3d1;
+  box-shadow:
+    0 2px 2px -0.8px rgba(249, 132, 43, 0.15) inset,
+    0 -6px 6px -2px rgba(255, 255, 255, 0.3) inset,
+    0 -12px 8px -2.5px #f3b078 inset,
+    0 -24px 18px -9px #ff7300 inset;
+}
+
+/* ==================== 返回展厅按钮 ==================== */
+.exit-button {
+  position: fixed;
+  top: 26px;
+  right: 30px;
+  width: 186px; /* 根据你的图片实际宽度调整 */
+  height: 61px; /* 根据你的图片实际高度调整 */
+  z-index: 1500;
+  background: url("/image/Return to Exhibition Hall _ Inactivated.png")
+    no-repeat center/contain;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+  overflow: hidden;
+  font-size: 16px;
+  color: #fff;
+}
+
+/* 悬停和激活状态 */
+.exit-button:hover,
+.exit-button:active {
+  background: url("/image/Return to Exhibition Hall _ Activated.png") no-repeat
+    center/contain;
+  transform: scale(1.01); /* 可选：轻微放大增强反馈 */
+}
+
+/* 如果你想让点击时有轻微按下效果 */
+.exit-button:active {
+  transform: scale(0.98);
+}
+
+/* ==================== ControlButtonsGame 样式 ==================== */
+#Control_f_game {
+  position: fixed;
+  left: 110px;
+  bottom: 55px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.Control_s_game {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+}
+
+.w-row {
+  margin-bottom: 4px;
+} /* W 键额外向下间距 */
+
+.game-key-wrapper {
+  position: relative;
+  width: 50px;
+  height: 50px;
+  cursor: pointer;
+  user-select: none;
+}
+
+/* 图层1：最外层 底层 */
+.layer-glow {
+  position: absolute;
+  inset: -6px;
+  border-radius: 14px;
+  background: #101112;
+  transition: all 0.15s ease;
+  opacity: 0.2;
+}
+
+/* 图层2：边框 */
+.layer-border {
+  position: absolute;
+  inset: -0.5px;
+  border-radius: 10px;
+  /* background: linear-gradient(160deg, #97eb55 0%, rgba(0, 0, 0, 0) 30%); */
+  background: linear-gradient(160deg, #ff8629 0%, rgba(0, 0, 0, 0) 30%);
+}
+
+/* 图层3： */
+.layer-inner-shadow {
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  bottom: 0px;
+  left: 0px;
+  border-radius: 11px;
+  background: conic-gradient(
+    from 180deg at 50% 50%,
+    #000 16.78654208779335deg,
+    #454545 43.896989822387695deg,
+    #000 74.83693599700928deg,
+    #000 123.46806764602661deg,
+    #595959 155.2453351020813deg,
+    #595959 212.3049759864807deg,
+    #000 277.0068955421448deg,
+    #535353 312.06064224243164deg,
+    #000 340.2401876449585deg
+  );
+
+  box-shadow: 0 0 3px 0 rgba(0, 0, 0, 0.8);
+}
+
+/* 图层4：主体 + 文字 */
+.layer-body {
+  position: absolute;
+  top: 5px;
+  right: 7px;
+  bottom: 9px;
+  left: 7px;
+  background: linear-gradient(270deg, #282828 0%, #4b4b4b 48.56%, #282828 100%);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0.4px -0.4px 0 0 rgba(214, 214, 214, 0.4);
+}
+
+.key-text {
+  font-family: "Segoe UI", sans-serif;
+  font-size: 17px;
+  font-weight: 400;
+  color: #ffffff;
+  text-shadow: 0 -2px 0 #000000;
+  /* 0 0 12px rgba(0, 255, 136, 0.8); */
+  transition: transform 0.1s ease;
+}
+
+/* 激活态（按下时） */
+.game-key-wrapper.active .layer-glow {
+  opacity: 0.3;
+}
+.game-key-wrapper.active .layer-border {
+  inset: -1px;
+  /* background: #70ff00;
+  box-shadow: 0 0 4px 0 #bcff87; */
+  background: #ff6a2f;
+  box-shadow: 0 0 4px 0 #ffbb3d;
+}
+.game-key-wrapper.active .layer-inner-shadow {
+  inset: 0.5px;
+  box-shadow: 0 0 0px 0 rgba(255, 255, 255, 0);
+}
+.game-key-wrapper.active .layer-body {
+  inset: 8px;
+  /* transform: translateY(2px); */
+}
+
+.game-key-wrapper.active .key-text {
+  /* color: #70ff00; */
+  color: #ffcc85;
+}
+
+/* 悬停效果 */
+.game-key-wrapper:hover .layer-glow {
+  opacity: 0.3;
+}
