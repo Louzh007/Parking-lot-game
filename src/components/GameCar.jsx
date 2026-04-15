@@ -255,7 +255,7 @@ const GameCar = ({
   }, [keyPressed.s, keyPressed.w]);
 
   // 悬挂：加速/刹车抬头压头（纯视觉，只改 carbodyParent 本地旋转）
-  function update_xuangua() {
+  function update_xuangua(step) {
     if (!carbodyParent.current) return;
     let currentRotationz = carbodyRotationz.current;
     const atMaxSpeed =
@@ -263,20 +263,21 @@ const GameCar = ({
 
     if (keyPressed.w && !atMaxSpeed) {
       currentRotationz = Math.min(
-        currentRotationz + xuanguajiasu,
+        currentRotationz + xuanguajiasu * step,
         MAX_xuanguajiao,
       );
     } else if (keyPressed.s && !atMaxSpeed) {
       currentRotationz = Math.max(
-        currentRotationz - xuanguajiasu,
+        currentRotationz - xuanguajiasu * step,
         MIN_xuanguajiao,
       );
     } else {
+      const suspensionDamping = Math.pow(0.98, step);
       if (currentRotationz > 0) {
-        currentRotationz *= 0.98;
+        currentRotationz *= suspensionDamping;
         if (currentRotationz < 0.001) currentRotationz = 0;
       } else if (currentRotationz < 0) {
-        currentRotationz *= 0.98;
+        currentRotationz *= suspensionDamping;
         if (currentRotationz > -0.001) currentRotationz = 0;
       }
     }
@@ -285,24 +286,24 @@ const GameCar = ({
   }
 
   // 悬挂：左右转弯摆动（纯视觉）
-  function update_xuangua_zuoyou() {
+  function update_xuangua_zuoyou(step) {
     if (!carbodyParent.current) return;
     if (Math.abs(wheelSpeedRef.current) < 0.015) return;
 
     let currentRotationx = carbodyRotationx.current;
     if (keyPressed.a) {
       currentRotationx = Math.min(
-        currentRotationx + xuanguajiasuzuoyou,
+        currentRotationx + xuanguajiasuzuoyou * step,
         MAX_xuanguajiaozuoyou,
       );
     } else if (keyPressed.d) {
       currentRotationx = Math.max(
-        currentRotationx - xuanguajiasuzuoyou,
+        currentRotationx - xuanguajiasuzuoyou * step,
         -MAX_xuanguajiaozuoyou,
       );
     } else {
       if (Math.abs(currentRotationx) > 0) {
-        currentRotationx *= 0.98;
+        currentRotationx *= Math.pow(0.98, step);
         if (Math.abs(currentRotationx) < 0.001) currentRotationx = 0;
       }
     }
@@ -310,7 +311,7 @@ const GameCar = ({
     carbodyParent.current.rotation.x = currentRotationx;
   }
 
-  useFrame(() => {
+  useFrame((_, delta) => {
     if (
       !modelRef.current ||
       !carRBRef?.current ||
@@ -320,10 +321,14 @@ const GameCar = ({
     )
       return;
 
+    // 帧率无关：以 60fps 为基准进行步长归一化，避免低帧机器车速变慢
+    const dt = Math.min(delta, 1 / 30);
+    const step = dt * 60;
+
     // ---- 轮速更新 ----
     if (keyPressed.w) {
       const newSpeed = Math.min(
-        wheelSpeedRef.current + jiasudu,
+        wheelSpeedRef.current + jiasudu * step,
         MAX_WHEEL_SPEED,
       );
       wheelSpeedRef.current = newSpeed;
@@ -331,60 +336,63 @@ const GameCar = ({
     }
     if (keyPressed.s) {
       const newSpeed = Math.max(
-        wheelSpeedRef.current - jiasudu,
+        wheelSpeedRef.current - jiasudu * step,
         -MAX_WHEEL_SPEED,
       );
       wheelSpeedRef.current = newSpeed;
       setWheelSpeed(newSpeed);
     }
     if (keyPressed.s && keyPressed.w) {
+      const brakeFactor = Math.pow(0.9, step);
       const finalSpeed =
-        Math.abs(wheelSpeedRef.current * 0.9) < 0.01
+        Math.abs(wheelSpeedRef.current * brakeFactor) < 0.01
           ? 0
-          : wheelSpeedRef.current * 0.9;
+          : wheelSpeedRef.current * brakeFactor;
       wheelSpeedRef.current = finalSpeed;
       setWheelSpeed(finalSpeed);
     }
     if (!keyPressed.s && !keyPressed.w) {
+      const frictionFactor = Math.pow(friction, step);
       const finalSpeed =
-        Math.abs(wheelSpeedRef.current * friction) < 0.01
+        Math.abs(wheelSpeedRef.current * frictionFactor) < 0.01
           ? 0
-          : wheelSpeedRef.current * friction;
+          : wheelSpeedRef.current * frictionFactor;
       wheelSpeedRef.current = finalSpeed;
       setWheelSpeed(finalSpeed);
     }
 
     // ---- 旋转轮胎（纯视觉，改本地旋转完全没问题）----
     Object.values(wheelRefs).forEach((wheel) => {
-      if (wheel.current) wheel.current.rotation.z -= wheelSpeedRef.current;
+      if (wheel.current) wheel.current.rotation.z -= wheelSpeedRef.current * step;
     });
 
     // ---- 转向（纯视觉，改前轮父级本地旋转）----
     if (keyPressed.a) {
       zuoqianlunParent.current.rotation.y = Math.min(
-        zuoqianlunParent.current.rotation.y + TURN_ANGLE,
+        zuoqianlunParent.current.rotation.y + TURN_ANGLE * step,
         MAX_TURN_ANGLE,
       );
       youqianlunParent.current.rotation.y = Math.min(
-        youqianlunParent.current.rotation.y + TURN_ANGLE,
+        youqianlunParent.current.rotation.y + TURN_ANGLE * step,
         MAX_TURN_ANGLE,
       );
     }
     if (keyPressed.d) {
       zuoqianlunParent.current.rotation.y = Math.max(
-        zuoqianlunParent.current.rotation.y - TURN_ANGLE,
+        zuoqianlunParent.current.rotation.y - TURN_ANGLE * step,
         -MAX_TURN_ANGLE,
       );
       youqianlunParent.current.rotation.y = Math.max(
-        youqianlunParent.current.rotation.y - TURN_ANGLE,
+        youqianlunParent.current.rotation.y - TURN_ANGLE * step,
         -MAX_TURN_ANGLE,
       );
     }
     if ((!keyPressed.a && !keyPressed.d) || (keyPressed.a && keyPressed.d)) {
-      zuoqianlunParent.current.rotation.y *= 0.9;
-      youqianlunParent.current.rotation.y *= 0.9;
+      const steerReturnFactor = Math.pow(0.9, step);
+      zuoqianlunParent.current.rotation.y *= steerReturnFactor;
+      youqianlunParent.current.rotation.y *= steerReturnFactor;
 
-      const newRotation = carbodyRotationx.current * 0.95;
+      const newRotation = carbodyRotationx.current * Math.pow(0.95, step);
       carbodyRotationx.current =
         Math.abs(newRotation) < 0.002 ? 0 : newRotation;
       carbodyParent.current.rotation.x = carbodyRotationx.current;
@@ -416,12 +424,12 @@ const GameCar = ({
 
     if (Math.abs(zhuanxiangjiao) < 0.01) {
       // 直行
-      const moveDistance = wheelSpeedRef.current * WHEEL_RADIUS;
+      const moveDistance = wheelSpeedRef.current * WHEEL_RADIUS * step;
       worldPos.current.add(forwardDir.multiplyScalar(moveDistance));
     } else {
       // 转弯（阿克曼转向公式，逻辑和原来完全一样）
       const moveDistance =
-        zuoyoufangxiang * wheelSpeedRef.current * WHEEL_RADIUS;
+        zuoyoufangxiang * wheelSpeedRef.current * WHEEL_RADIUS * step;
       const turnRadius = zhouju / Math.tan(Math.abs(zhuanxiangjiao));
       const turnAngle = moveDistance / turnRadius;
 
@@ -456,8 +464,8 @@ const GameCar = ({
     });
 
     // 悬挂视觉动画
-    update_xuangua();
-    update_xuangua_zuoyou();
+    update_xuangua(step);
+    update_xuangua_zuoyou(step);
   });
 
   return (
