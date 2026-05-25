@@ -22,6 +22,7 @@ import { CarPaintMaterial } from "../Carpaint/CarPaintMaterial"; // 导入自定
 import * as THREE from "three";
 import { CarShadow } from "./CarShadow"; //导入阴影组件
 import ParticleWaveGround from "./background";
+import ShowroomGround from "./ShowroomGround";
 import { CloudMaterial } from "./CloudMaterial";
 import FlowLines from "./FlowLines";
 
@@ -1039,6 +1040,7 @@ const Car = ({
 
   return (
     <>
+      <ShowroomGround />
       {/* 车辆逻辑组 */}
       <group ref={carParent}>
         <CarShadow width={3.1} height={3.6} opacity={0.8} />
