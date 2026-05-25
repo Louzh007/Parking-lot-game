@@ -193,6 +193,8 @@ export interface GameLevel {
    * 不写或写 [] 则本关不放。模型路径见 ParkingLevel 内 PROP_MODEL_PATH。
    */
   propObstacles?: PropObstacleConfig[];
+  /** 是否开启空格跳跃（开启后游戏控制区会显示空格按钮） */
+  enableSpaceJump?: boolean;
 }
 
 // =============================================================================
@@ -286,7 +288,8 @@ export const GAME_LEVELS: GameLevel[] = [
       // { kind: "dianpingche", position: [-2.2, 0, 5], rotation: [0, 0.4, 0] },
       // { kind: "lixiangbaimo", position: [0, 0, 0] },
     ],
-  }, // 第 3 关：困难 —— 每侧 6 个车位，过道更窄一点，右侧多一堵墙
+  },
+  // 第 3 关：困难 —— 每侧 6 个车位，过道更窄一点，右侧多一堵墙
   // ---------------------------------------------------------------------------
   {
     id: 3,
@@ -294,33 +297,34 @@ export const GAME_LEVELS: GameLevel[] = [
     difficultyStars: 3,
     winText: "还行吧",
     loseText: "玩的明白吗你",
-    winSubText: "这种车位我一般扭头就走了",
-    loseSubText: "可能是车的问题，换理想就随便停了",
-    timeLimitSec: 45,
+    winSubText: "有点东西啊",
+    loseSubText: "理他做什么，想停哪停哪",
+    timeLimitSec: 90,
     wallet: 3000,
     penaltyPerHit: 1000,
     initialPos: [0, 0, 8], // 偏一点出生，方便进车位
     initialRotY: 2 * Math.PI, // 和 Math.PI 同向，数值上写成 2π
     spotWidth: 1.3,
+    spotDepth: 3,
     targetSpots: ["A-6"], // 中等模式常只空一个，这里指定优先 A-6
     silentEmptySpots: ["B-6", "B-5"],
     emptySpotsCount: 1,
     walls: [
-      { position: [0, 0.5, -4.7], args: [8, 0.8, 0.8] },
-      { position: [4.4, 0.5, 0], args: [0.8, 0.8, 8.5] },
+      { position: [0, 0.5, -4.4], args: [8, 0.8, 0.8] },
+      { position: [4.32, 0.5, 0], args: [0.8, 0.8, 8.5] },
     ],
     parkingLayout: [
       {
         kind: "yipai",
         idPrefix: "A",
-        anchor: [0, 0, -2.5],
+        anchor: [0, 0, -2.2],
         count: 6,
         rotationY: 0,
       },
       {
         kind: "yipai",
         idPrefix: "B",
-        anchor: [0, 0, 2.5],
+        anchor: [0, 0, 2.2],
         count: 6,
         rotationY: Math.PI,
       },
@@ -352,27 +356,28 @@ export const GAME_LEVELS: GameLevel[] = [
     penaltyPerHit: 2000,
     initialPos: [-9, 0, 0], // 左侧开口，从左边开进场地
     initialRotY: 0,
-    spotWidth: 1.5,
+    spotWidth: 1.3,
+    spotDepth: 3,
     targetSpots: ["R-1"], // 右侧一列里最靠外那个当目标空位；若游戏里上下反了可改成 R-4
     emptySpotsCount: 1,
     // U 形墙：上、下、右三面；左边不封，当入口
     walls: [
-      { position: [0, 0.5, -5], args: [10, 1, 0.5] },
-      { position: [0, 0.5, 5], args: [10, 1, 0.5] },
-      { position: [5, 0.5, 0], args: [0.5, 1, 9] },
+      { position: [0, 0.5, -4.2], args: [9, 1, 0.5] },
+      { position: [0, 0.5, 4.2], args: [9, 1, 0.5] },
+      { position: [4, 0.5, 0], args: [0.5, 1, 8] },
     ],
     parkingLayout: [
       {
         kind: "yipai",
         idPrefix: "TL",
-        anchor: [-3.2, 0, -2.5],
+        anchor: [-3.2, 0, -2.2],
         count: 3,
         rotationY: 0,
       },
       {
         kind: "yipai",
         idPrefix: "BL",
-        anchor: [-3.2, 0, 2.5],
+        anchor: [-3.2, 0, 2.2],
         count: 3,
         rotationY: Math.PI,
       },
@@ -380,14 +385,14 @@ export const GAME_LEVELS: GameLevel[] = [
       {
         kind: "yipai",
         idPrefix: "R",
-        anchor: [2.5, 0, 0],
+        anchor: [1.9, 0, 0],
         count: 6,
         rotationY: -Math.PI / 2,
         along: "x",
       },
     ],
     propObstacles: [
-      { kind: "xuegaotong", position: [3.6, 0, 4] },
+      { kind: "xuegaotong", position: [3.2, 0, 3.5] },
       { kind: "dianpingche", position: [0, 0, -3], rotation: [0, -1, 0] },
       // { kind: "lixiangbaimo", position: [0, 0, 0] },
     ],
@@ -400,10 +405,10 @@ export const GAME_LEVELS: GameLevel[] = [
     label: "炼狱 (HELL)",
     difficultyStars: 4,
     winText: "愣头青，这种车位都停",
-    loseText: "别挪了，再挪也就那样了",
+    loseText: "别挪了 再挪也进不去了",
     winSubText: "小胡，明年保费给他涨个5000",
     loseSubText: "小胡，明年保费给他涨个2000",
-    timeLimitSec: 120,
+    timeLimitSec: 100,
     wallet: 3000,
     penaltyPerHit: 2000,
     initialPos: [-10, 0, 0], // 左侧开口，从左边开进场地
@@ -444,6 +449,58 @@ export const GAME_LEVELS: GameLevel[] = [
         kind: "lixiangbaimo",
         position: [1.4, 0, -1.1],
         rotation: [0, 0.15, 0],
+      },
+    ],
+  },
+  // 第 6 关：困难 —— 每侧 6 个车位，过道更窄一点，右侧多一堵墙
+  // ---------------------------------------------------------------------------
+  {
+    id: 6,
+    label: "炼狱 (HELL)",
+    difficultyStars: 4,
+    winText: "通关成功",
+    loseText: "龙卷风摧毁停车场",
+    winSubText: "有点东西啊",
+    loseSubText: "你故意找茬是吧",
+    timeLimitSec: 90,
+    wallet: 3000,
+    penaltyPerHit: 3000,
+    initialPos: [0, 0, 8], // 偏一点出生，方便进车位
+    initialRotY: 2 * Math.PI, // 和 Math.PI 同向，数值上写成 2π
+    spotWidth: 1.3,
+    spotDepth: 3,
+    enableSpaceJump: true,
+    targetSpots: ["A-6", "A-5", "A-4"], // 中等模式常只空一个，这里指定优先 A-6
+    silentEmptySpots: ["B-1", "B-2"],
+    emptySpotsCount: 3,
+    walls: [
+      { position: [0, 0.5, -4.1], args: [7.5, 0.3, 0.3] },
+      { position: [4.2, 0.5, 0], args: [0.3, 0.3, 8.5] },
+      { position: [-4.2, 0.5, 0], args: [0.3, 0.3, 8.5] },
+    ],
+    parkingLayout: [
+      {
+        kind: "yipai",
+        idPrefix: "A",
+        anchor: [0, 0, -2.2],
+        count: 6,
+        rotationY: 0,
+      },
+      {
+        kind: "yipai",
+        idPrefix: "B",
+        anchor: [-0.6, 0, 2.2],
+        count: 5,
+        rotationY: Math.PI,
+      },
+    ],
+    propObstacles: [
+      // { kind: "xuegaotong", position: [3, 0, 2] },
+      // { kind: "dianpingche", position: [-2.2, 0, 5], rotation: [0, 0.4, 0] },
+      {
+        kind: "lixiangbaimo",
+        position: [1.8, 0, 2.5],
+        rotation: [0, 0.3, 0],
       },
     ],
   },

@@ -104,7 +104,7 @@ const GameResultUI = ({
   maxUnlockedLevelIndex,
   onRetry,
   onNextLevel,
-  onExit,
+  // onExit,
   onSelectLevel,
   isLastLevel,
 }: {
@@ -131,14 +131,14 @@ const GameResultUI = ({
   const accent = isWin ? "#39ff9c" : "#ff7a21";
   const titlecolor = isWin ? "#F1F1F1" : "#FFECEC";
   const titleGlow = isWin
-    ? "0 0 24px rgba(57,255,156,0.75)"
-    : "0 0 28px rgba(255,120,80,0.85)";
+    ? "0 0 22px rgba(57,255,156,0.75)"
+    : "0 0 22px rgba(255,120,80,0.85)";
   const subBorder = isWin
-    ? "rgba(57,255,156,0.55)"
-    : "rgba(255, 110, 132, 0.50)";
+    ? "rgba(57,255,156,0.3)"
+    : "rgba(255, 110, 132, 0.30)";
   const subBackground = isWin
-    ? "rgba(57,255,156,0.10)"
-    : "rgba(255, 110, 132, 0.10)";
+    ? "rgba(15, 58, 36, 0.2)"
+    : "rgba(15, 20, 17, 0.2)";
   const subTextColor = isWin ? "#51FF33" : "#FF6E84";
 
   const elapsedSec = Math.max(0, timeLimitSec - remainingTime);
@@ -171,24 +171,30 @@ const GameResultUI = ({
       >
         <div
           style={{
-            position: "relative",
+            position: "relative" /* 相对定位 */,
             width: "min(560px, 94vw)",
             maxHeight: "min(90vh, 720px)",
             overflow: "auto",
-            borderRadius: 2,
-            boxShadow: "0 12px 48px rgba(0,0,0,0.55)",
-            backgroundImage: `url(${POPUP_IMG}${isWin ? "win_popup_bg.png" : "lose_popup_bg.png"})`,
-            backgroundSize: "100% 100%",
-            backgroundPosition: "center",
+            // borderRadius: 8,
+            // boxShadow: "0 12px 48px rgba(0,0,0,0.2)",
+            // backgroundImage: `url(${POPUP_IMG}${isWin ? "win_popup_bg.png" : "lose_popup_bg.png"})`,
+            // backgroundSize: "100% 100%",
+            // backgroundPosition: "center",
+            // background: isWin
+            //   ? "rgba(15, 20, 17, 0.0);"
+            //   : "rgba(22, 16, 16, 0.0)",
+            // border: isWin
+            //   ? "1px solid rgba(57, 255, 156, 0.05)"
+            //   : "1px solid rgba(255, 120, 80, 0.05)",
           }}
         >
-          <button
+          {/* <button
             type="button"
             onClick={onExit}
             style={{
               position: "absolute",
-              top: 14,
-              left: 14,
+              top: 0,
+              left: 58,
               zIndex: 2,
               display: "flex",
               alignItems: "center",
@@ -196,7 +202,7 @@ const GameResultUI = ({
               padding: "6px 8px",
               border: "none",
               background: "transparent",
-              color: "#eaeaea",
+              color: isWin ? "#39FF9C" : "#FF8F73",
               fontSize: 14,
               fontWeight: 400,
               cursor: "pointer",
@@ -205,12 +211,12 @@ const GameResultUI = ({
             <img
               src={`${POPUP_IMG}${isWin ? "win_icon_back.png" : "lose_icon_back.png"}`}
               alt=""
-              style={{ width: 18, height: 18, objectFit: "contain" }}
+              style={{ width: 16, height: 18, objectFit: "contain" }}
             />
             返回展厅
-          </button>
+          </button> */}
 
-          <div style={{ padding: "52px 72px 32px" }}>
+          <div style={{ padding: "8px 72px 32px" }}>
             <h1
               style={{
                 marginTop: 12,
@@ -232,7 +238,7 @@ const GameResultUI = ({
                 padding: "6px 16px",
                 width: "fit-content",
                 maxWidth: "100%",
-                borderRadius: 8,
+                borderRadius: 3,
                 border: `1px solid ${subBorder}`,
                 background: subBackground,
                 justifyContent: "center",
@@ -652,42 +658,53 @@ export const GameHUD: React.FC<GameHUDProps> = ({
 }) => {
   const pct = Math.max(0, wallet / maxWallet);
   const isTimeWarning = remainingTime <= 10;
+  const timerChrome = isTimeWarning
+    ? {
+        border: "0.5px solid #FFA6A6",
+        boxShadow:
+          "0 2px 2px -0.8px rgba(255, 32, 32, 0.15) inset, 0 -6px 6px -2px rgba(255, 255, 255, 0.30) inset, 0 -12px 8px -2.5px rgba(193, 0, 0, 0.50) inset, 0 -24px 18px -9px #A50000 inset",
+      }
+    : {
+        border: "0.5px solid #FFE1C3",
+        boxShadow:
+          "0 2px 2px -0.8px rgba(249, 132, 43, 0.15) inset, 0 -6px 6px -2px rgba(255, 255, 255, 0.30) inset, 0 -12px 8px -2.5px #E28B43 inset, 0 -24px 18px -9px #FF7300 inset",
+      };
 
   return (
     <>
-      {/* 剩余时间样式 */}
+      {/* 剩余时间：分:秒；最后 10 秒切换红色内光 */}
       <div
         style={{
           position: "fixed",
-          top: 30,
+          top: 32,
           left: "50%",
           transform: "translateX(-50%)",
           minWidth: 56,
-          padding: "8px 22px",
-          borderRadius: 50,
-          border: `2px solid ${isTimeWarning ? "#ff6666" : "#00ff88"}`,
-          background: "rgba(22, 27, 22, 0.6)",
-          color: isTimeWarning ? "#ff6666" : "#ffffff",
+          padding: "6px 24px",
+          borderRadius: 8,
+          background: "linear-gradient(180deg, #0A0909 0%, #1F0909 100%)",
+          color: "#ffffff",
           fontSize: 24,
           fontWeight: 800,
           letterSpacing: 2,
+          fontVariantNumeric: "tabular-nums",
           textAlign: "center",
           zIndex: 1600,
           pointerEvents: "none",
-          boxShadow: `0 0 8px ${isTimeWarning ? "#ff444433" : "#00ff8833"}`,
           fontFamily: "'Segoe UI', sans-serif",
           visibility: gameResult ? "hidden" : "visible",
+          ...timerChrome,
         }}
       >
-        {remainingTime}
+        {formatMmSs(remainingTime)}
       </div>
 
       {/* --- 顶部核心 UI 面板 --- */}
       <div
         style={{
           position: "fixed",
-          top: 120,
-          right: 40,
+          top: 100,
+          left: 38,
           width: 280,
           height: 140,
           backgroundImage: `url('./image/Level background.png')`, // 使用你的背景切图

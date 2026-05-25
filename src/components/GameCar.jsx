@@ -19,6 +19,7 @@ const HULL_GLB_PATH_SU7U = "./models/su7U pengzhuangtibaobian.glb";
 const GameCar = ({
   currentModel = "xiaomi su7-action3",
   keyPressed,
+  enableSpaceJump = false,
   health,
   onCollision,
   setWheelSpeed = (speed) => {},
@@ -33,6 +34,9 @@ const GameCar = ({
   const sideVecRef = useRef(new THREE.Vector3());
   const turnCenterRef = useRef(new THREE.Vector3());
   const relativePosRef = useRef(new THREE.Vector3());
+  const verticalVelocityRef = useRef(0);
+  const wasSpacePressedRef = useRef(false);
+  const baseYRef = useRef(initialPos[1]);
 
   // 根据健康值获取颜色（模拟车辆状态变化）
   const getHealthColor = () => {
@@ -73,6 +77,9 @@ const GameCar = ({
 
   // ✅ 挂载后立即把初始位置同步到 RigidBody，避免第一帧前出现瞬移
   useEffect(() => {
+    baseYRef.current = initialPos[1];
+    verticalVelocityRef.current = 0;
+    wasSpacePressedRef.current = false;
     if (!carRBRef?.current) return;
     carRBRef.current.setNextKinematicTranslation({
       x: initialPos[0],
@@ -124,6 +131,9 @@ const GameCar = ({
   const WHEEL_RADIUS = 0.175;
   const zhouju = 1.5;
   const MAX_TURN_ANGLE = 0.52;
+  const JUMP_IMPULSE = 0.15;
+  const AIR_JUMP_MULTIPLIER = 0.8;
+  const JUMP_GRAVITY = 0.3;
 
   const carbodyRotationz = useRef(0);
   const carbodyRotationx = useRef(0);
@@ -324,6 +334,31 @@ const GameCar = ({
     // 帧率无关：以 60fps 为基准进行步长归一化，避免低帧机器车速变慢
     const dt = Math.min(delta, 1 / 30);
     const step = dt * 60;
+    const isSpacePressed = Boolean(keyPressed.space);
+    const justPressedSpace = isSpacePressed && !wasSpacePressedRef.current;
+
+    // 多段跳（可空中叠加）：只有「按下瞬间」触发，长按不会重复触发
+    if (enableSpaceJump && justPressedSpace) {
+      const isGrounded = worldPos.current.y <= baseYRef.current + 1e-3; // 地面误差
+      const jumpImpulse = isGrounded
+        ? JUMP_IMPULSE
+        : JUMP_IMPULSE * AIR_JUMP_MULTIPLIER;
+      verticalVelocityRef.current += jumpImpulse;
+    }
+    wasSpacePressedRef.current = isSpacePressed;
+
+    const isGrounded = worldPos.current.y <= baseYRef.current + 1e-3; // 地面误差
+    if (enableSpaceJump || !isGrounded) {
+      verticalVelocityRef.current -= JUMP_GRAVITY * dt;
+      worldPos.current.y += verticalVelocityRef.current;
+      if (worldPos.current.y <= baseYRef.current) {
+        worldPos.current.y = baseYRef.current;
+        verticalVelocityRef.current = 0;
+      }
+    } else {
+      worldPos.current.y = baseYRef.current;
+      verticalVelocityRef.current = 0;
+    }
 
     // ---- 轮速更新 ----
     if (keyPressed.w) {
@@ -363,7 +398,8 @@ const GameCar = ({
 
     // ---- 旋转轮胎（纯视觉，改本地旋转完全没问题）----
     Object.values(wheelRefs).forEach((wheel) => {
-      if (wheel.current) wheel.current.rotation.z -= wheelSpeedRef.current * step;
+      if (wheel.current)
+        wheel.current.rotation.z -= wheelSpeedRef.current * step;
     });
 
     // ---- 转向（纯视觉，改前轮父级本地旋转）----
@@ -405,6 +441,17 @@ const GameCar = ({
     // ---- 停车时不计算移动，直接返回 ----
     if (Math.abs(wheelSpeedRef.current) < 0.01) {
       lastValidPos.current.copy(worldPos.current); // 即使静止也更新有效位置
+      carRBRef.current.setNextKinematicTranslation({
+        x: worldPos.current.x,
+        y: worldPos.current.y,
+        z: worldPos.current.z,
+      });
+      carRBRef.current.setNextKinematicRotation({
+        x: 0,
+        y: Math.sin(worldRotY.current / 2),
+        z: 0,
+        w: Math.cos(worldRotY.current / 2),
+      });
       return;
     }
 

@@ -26,6 +26,13 @@ import { GameHUD } from "./components/ui/GameHUD";
 import { GameStartIntro } from "./components/ui/GameStartIntro";
 import { GAME_LEVELS } from "./config/gameLevels";
 
+/**
+ * 开发测试开关：设为 true 时，所有关卡从一开始就视为已解锁，
+ * 可在结算弹窗里直接选择后续关卡（例如快速测试第 6 关）。
+ * 正式流程请保持 false（仍按通关进度逐关解锁）。
+ */
+const UNLOCK_ALL_LEVELS_FOR_TEST = true;
+
 function App() {
   // 1. 全局状态管理（对应原JS的全局变量）
   const [currentModel, setCurrentModel] = useState("xiaomi su7-action3"); // 当前模型
@@ -40,6 +47,7 @@ function App() {
     a: false,
     s: false,
     d: false,
+    space: false,
   }); // WASD按键状态
   const [isLoading, setIsLoading] = useState(true); // 是否加载中
   const [loadingProgress, setLoadingProgress] = useState(0); // 加载进度
@@ -85,7 +93,9 @@ function App() {
 
   // --- 游戏逻辑相关状态 ---
   const [levelIndex, setLevelIndex] = useState(0);
-  const [maxUnlockedLevelIndex, setMaxUnlockedLevelIndex] = useState(0);
+  const [maxUnlockedLevelIndex, setMaxUnlockedLevelIndex] = useState(
+    UNLOCK_ALL_LEVELS_FOR_TEST ? GAME_LEVELS.length - 1 : 0,
+  );
   const [wallet, setWallet] = useState(GAME_LEVELS[0].wallet);
   const [collisionCount, setCollisionCount] = useState(0);
   const [gameResult, setGameResult] = useState<"win" | "lose" | null>(null);
@@ -219,6 +229,9 @@ function App() {
     [maxUnlockedLevelIndex, resetGame],
   );
 
+  const currentLevelConfig = GAME_LEVELS[levelIndex];
+  const isSpaceJumpEnabled = Boolean(currentLevelConfig.enableSpaceJump);
+
   // 2. 事件处理：更新WASD按键状态（传递给ControlButtons和Car组件）
   const handleKeyChange = (key: string, isPressed: boolean) => {
     setKeyPressed((prev) => ({ ...prev, [key]: isPressed })); //...prev 是 ES6 中的扩展运算符（spread operator），主要用于复制对象的属性
@@ -243,7 +256,7 @@ function App() {
       >
         <color
           attach="background"
-          args={[isGameMode ? "#1F0903" : "#323438"]}
+          args={[isGameMode ? "#1D1919" : "#323438"]}
         />
 
         {/* 只有在游戏模式下才启用物理引擎 */}
@@ -255,13 +268,14 @@ function App() {
                 key={`car-${resetKey}`} // 强制重置
                 currentModel={currentModel}
                 keyPressed={keyPressed}
+                enableSpaceJump={isSpaceJumpEnabled}
                 health={health} // 传递健康值
                 onCollision={handleCollision} // 传递碰撞处理
                 setWheelSpeed={syncWheelSpeed} // 使用同步函数更新
                 setChetoufangxiang={setChetoufangxiang}
                 carRBRef={gameCarRBRef} // 把 ref 传给 GameCar
-                initialPos={GAME_LEVELS[levelIndex].initialPos}
-                initialRotY={GAME_LEVELS[levelIndex].initialRotY}
+                initialPos={currentLevelConfig.initialPos}
+                initialRotY={currentLevelConfig.initialRotY}
               />
               {/* 副本里的车位、障碍物 */}
               <ParkingLevel
@@ -346,6 +360,7 @@ function App() {
         <ControlButtonsGame
           keyPressed={keyPressed}
           onKeyChange={handleKeyChange}
+          enableSpaceJump={isSpaceJumpEnabled}
           style={{ zIndex: 1000 }}
         />
       ) : (

@@ -33,7 +33,7 @@ export function GameCamera({ carRBRef, initialPos }: GameCameraProps) {
       initialCarPos.x,
       initialCarPos.y,
       initialCarPos.z,
-      true, // 立即跳转，无过渡
+      // true, // 立即跳转，无过渡
     );
 
     lastCarPos.current.copy(initialCarPos);

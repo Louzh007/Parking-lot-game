@@ -3,17 +3,16 @@ import { Vector3 } from "three";
 
 export const COLORS = [
   {
-    color: "#004225",
-    flake: "#199861",
-    perl: "#01632a",
-    url: "./image/carbodycolor_orange.png",
-  },
-
-  {
     color: "#202020",
     flake: "#6b6b6b",
     perl: "#4c4c4c",
     url: "./image/carbodycolor_black_u.png",
+  },
+  {
+    color: "#004225",
+    flake: "#199861",
+    perl: "#01632a",
+    url: "./image/carbodycolor_orange.png",
   },
   {
     color: "#86004E",

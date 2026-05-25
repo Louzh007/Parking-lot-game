@@ -167,10 +167,27 @@ const ParkingSpotLines = ({
 
       {/* 目标空位：半透明绿，方便辨认 */}
       {isTarget && (
-        <mesh position={[0, 0.01, 0]}>
-          <planeGeometry args={[spotWidth / 1.2, spotDepth / 1.2]} />
-          <meshStandardMaterial color="#00ff00" transparent opacity={0.4} />
-        </mesh>
+        <>
+          <mesh position={[0, 0.01, -0.2]} rotation={[-Math.PI / 2, 0, 0]}>
+            <planeGeometry args={[spotWidth / 1.2, spotDepth / 3]} />
+            <meshStandardMaterial color="#00ff00" transparent opacity={0.3} />
+          </mesh>
+          <Text
+            position={[0, 0.015, -0.2]}
+            rotation={[-Math.PI / 2, 0, 0]}
+            fontSize={Math.min(spotWidth, spotDepth) * 0.5}
+            color="#ffffff"
+            fillOpacity={3}
+            anchorX="center"
+            anchorY="middle"
+            outlineWidth="5%"
+            outlineColor="#2C8E32"
+            outlineOpacity={1}
+            material-toneMapped={false}
+          >
+            P
+          </Text>
+        </>
       )}
 
       <Text

@@ -538,28 +538,33 @@ button {
 /* ==================== 返回展厅按钮 ==================== */
 .exit-button {
   position: fixed;
-  top: 26px;
+  top: 20px;
   right: 30px;
   width: 186px; /* 根据你的图片实际宽度调整 */
-  height: 61px; /* 根据你的图片实际高度调整 */
+  height: 72px; /* 根据你的图片实际高度调整 */
   z-index: 1500;
-  background: url("/image/Return to Exhibition Hall _ Inactivated.png")
-    no-repeat center/contain;
+  background-image: url("/image/Return to Exhibition Hall _ Inactivated.png");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 100% 100%; /* 强制拉伸，不保持比例 */
   border: none;
   cursor: pointer;
   transition: all 0.2s ease;
   padding: 0;
   overflow: hidden;
-  font-size: 16px;
-  color: #fff;
+  font-size: 15px;
+  font-weight: 400;
+  color: #ffffffd2;
+  /* 新增：文字字间距调整 */
+  letter-spacing: 2px;
 }
 
 /* 悬停和激活状态 */
 .exit-button:hover,
 .exit-button:active {
-  background: url("/image/Return to Exhibition Hall _ Activated.png") no-repeat
-    center/contain;
+  background-image: url("/image/Return to Exhibition Hall _ Activated.png");
   transform: scale(1.01); /* 可选：轻微放大增强反馈 */
+  color: #ffffff;
 }
 
 /* 如果你想让点击时有轻微按下效果 */
@@ -585,9 +590,27 @@ button {
   gap: 6px;
 }
 
+.controls-row {
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.wasd-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.wasd-row {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+}
+
 .w-row {
-  margin-bottom: 4px;
-} /* W 键额外向下间距 */
+  margin-bottom: 0;
+}
 
 .game-key-wrapper {
   position: relative;

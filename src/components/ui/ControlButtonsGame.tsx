@@ -3,29 +3,45 @@
 import { useEffect } from "react";
 
 interface ControlButtonsGameProps {
-  keyPressed: { w: boolean; a: boolean; s: boolean; d: boolean };
+  keyPressed: {
+    w: boolean;
+    a: boolean;
+    s: boolean;
+    d: boolean;
+    space: boolean;
+  };
   onKeyChange: (key: string, pressed: boolean) => void;
+  enableSpaceJump?: boolean;
   style?: React.CSSProperties;
 }
 
 export default function ControlButtonsGame({
   keyPressed,
   onKeyChange,
+  enableSpaceJump = false,
   style,
 }: ControlButtonsGameProps) {
   // ==================== 键盘事件（和原来完全一致） ====================
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       const key = e.key.toLowerCase();
-      if (["w", "a", "s", "d"].includes(key)) {
-        onKeyChange(key, true);
+      const targetKey = key === " " ? "space" : key;
+      if (["w", "a", "s", "d"].includes(targetKey)) {
+        onKeyChange(targetKey, true);
+      }
+      if (enableSpaceJump && targetKey === "space") {
+        onKeyChange("space", true);
       }
     };
 
     const handleKeyUp = (e: KeyboardEvent) => {
       const key = e.key.toLowerCase();
-      if (["w", "a", "s", "d"].includes(key)) {
-        onKeyChange(key, false);
+      const targetKey = key === " " ? "space" : key;
+      if (["w", "a", "s", "d"].includes(targetKey)) {
+        onKeyChange(targetKey, false);
+      }
+      if (enableSpaceJump && targetKey === "space") {
+        onKeyChange("space", false);
       }
     };
 
@@ -36,7 +52,7 @@ export default function ControlButtonsGame({
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("keyup", handleKeyUp);
     };
-  }, [onKeyChange]);
+  }, [onKeyChange, enableSpaceJump]);
 
   const handlePress = (key: string) => onKeyChange(key, true);
   const handleRelease = (key: string) => onKeyChange(key, false);
@@ -75,14 +91,34 @@ export default function ControlButtonsGame({
 
   return (
     <ul id="Control_f_game" style={style}>
-      {/* W 键单独一行 */}
-      <li className="Control_s_game w-row">{renderKey("w")}</li>
+      <li className="Control_s_game controls-row">
+        {/* WASD 区域：保证 W 永远在 S 正上方 */}
+        <div className="wasd-stack">
+          <div className="wasd-row w-row">{renderKey("w")}</div>
+          <div className="wasd-row asd-row">
+            {renderKey("a")}
+            {renderKey("s")}
+            {renderKey("d")}
+          </div>
+        </div>
 
-      {/* A S D 一行 */}
-      <li className="Control_s_game asd-row">
-        {renderKey("a", { marginRight: "12px" })}
-        {renderKey("s", { marginRight: "12px" })}
-        {renderKey("d")}
+        {/* SPACE 区域：与 WASD 分组，避免把 W 中心拉偏 */}
+        {enableSpaceJump && (
+          <div
+            className={`game-key-wrapper ${keyPressed.space ? "active" : ""}`}
+            onMouseDown={() => handlePress("space")}
+            onMouseUp={() => handleRelease("space")}
+            onMouseLeave={() => handleRelease("space")}
+            style={{ marginLeft: "12px", minWidth: 120, width: 120 }}
+          >
+            <div className="layer-glow" />
+            <div className="layer-border" />
+            <div className="layer-inner-shadow" />
+            <div className="layer-body">
+              <span className="key-text">SPACE</span>
+            </div>
+          </div>
+        )}
       </li>
     </ul>
   );
