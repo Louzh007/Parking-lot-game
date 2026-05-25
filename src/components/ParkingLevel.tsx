@@ -23,6 +23,7 @@ import {
   GAME_LEVELS,
   expandParkingLayoutToSpots,
   PARKING_SPOT_DEPTH,
+  type WallConfig,
   type PropObstacleConfig,
   type PropObstacleKind,
 } from "../config/gameLevels";
@@ -350,6 +351,46 @@ const Wall = ({
   );
 };
 
+function buildBoundaryWalls(
+  boundary:
+    | {
+        size: number;
+        height?: number;
+        thickness?: number;
+        centerY?: number;
+      }
+    | undefined,
+): WallConfig[] {
+  if (!boundary) return [];
+
+  const size = boundary.size;
+  const thickness = boundary.thickness ?? 0.4;
+  const height = boundary.height ?? 1;
+  const centerY = boundary.centerY ?? height / 2;
+  const halfSize = size / 2;
+  const offset = halfSize + thickness / 2;
+  const horizontalLength = size + thickness * 2;
+
+  return [
+    {
+      position: [0, centerY, -offset],
+      args: [horizontalLength, height, thickness],
+    },
+    {
+      position: [0, centerY, offset],
+      args: [horizontalLength, height, thickness],
+    },
+    {
+      position: [-offset, centerY, 0],
+      args: [thickness, height, size],
+    },
+    {
+      position: [offset, centerY, 0],
+      args: [thickness, height, size],
+    },
+  ];
+}
+
 // =================================================================
 // --- 关卡配置的道具障碍（雪糕筒 / 电瓶车等 glb）---
 // =================================================================
@@ -584,6 +625,14 @@ const ParkingLevel: React.FC<ParkingLevelProps> = ({
   onInitTarget,
 }) => {
   const levelConfig = GAME_LEVELS[Math.min(levelIndex, GAME_LEVELS.length - 1)];
+  const boundaryWalls = useMemo(
+    () => buildBoundaryWalls(levelConfig.boundary),
+    [levelConfig.boundary],
+  );
+  const allWalls = useMemo(
+    () => [...boundaryWalls, ...levelConfig.walls],
+    [boundaryWalls, levelConfig.walls],
+  );
   const lastParkingCheckAt = useRef(0);
   // 矩形停车判定：复用四元数/向量，避免 useFrame 里每帧分配
   const carQuatRef = useRef(new THREE.Quaternion());
@@ -762,8 +811,8 @@ const ParkingLevel: React.FC<ParkingLevelProps> = ({
         );
       })}
 
-      {/* 边界墙 - 从关卡配置动态加载 */}
-      {levelConfig.walls.map((wall, idx) => (
+      {/* 边界围墙 + 关卡内部墙体 */}
+      {allWalls.map((wall, idx) => (
         <Wall
           key={`wall-${idx}`}
           position={wall.position}

@@ -20,6 +20,17 @@ export interface WallConfig {
   args: [number, number, number];
 }
 
+export interface LevelBoundaryConfig {
+  /** 可活动区域尺寸，单位和关卡坐标一致；15 表示 15x15 的正方形停车场 */
+  size: number;
+  /** 围墙高度；不写默认 1 */
+  height?: number;
+  /** 围墙厚度；不写默认 0.4 */
+  thickness?: number;
+  /** 围墙中心的 Y 坐标；不写则按 height/2 自动放到地面上方 */
+  centerY?: number;
+}
+
 /** 游戏模式额外道具障碍：对应 public/models 下 glb 文件名（不含路径） */
 export type PropObstacleKind = "xuegaotong" | "dianpingche" | "lixiangbaimo";
 
@@ -179,6 +190,8 @@ export interface GameLevel {
   silentEmptySpots?: string[];
   /** 本关要随机几个空位（会先尽量满足 targetSpots） */
   emptySpotsCount: number;
+  /** 停车场外边界：自动生成四面围墙，把车限制在场地内 */
+  boundary?: LevelBoundaryConfig;
   /** 墙体列表：每堵墙 position + args，和车位一样手写 */
   walls: WallConfig[];
   /**
@@ -211,7 +224,7 @@ export const GAME_LEVELS: GameLevel[] = [
     difficultyStars: 1,
     winText: "AUV 我就知道你可以的",
     loseText: "你会玩个刁",
-    winSubText: "国内哪还有这么宽的车位啊",
+    winSubText: "这还是国内吗，哪还有这么宽的车位啊",
     loseSubText: "这种车位不是闭着眼睛停的吗",
     timeLimitSec: 60,
     wallet: 5000,
@@ -221,6 +234,7 @@ export const GAME_LEVELS: GameLevel[] = [
     spotWidth: 1.8,
     targetSpots: ["A-2", "B-3"], // 在 A-2 / B-3 里随机出空位（共 emptySpotsCount 个）
     emptySpotsCount: 2,
+    boundary: { size: 40 },
     walls: [
       { position: [0, 0.5, -6], args: [8, 1, 0.2] },
       { position: [0, 0.5, 6], args: [8, 1, 0.2] },
@@ -271,6 +285,7 @@ export const GAME_LEVELS: GameLevel[] = [
     spotDepth: 3.2,
     targetSpots: ["A-3"], // 中等模式常只空一个，这里指定优先 A-6
     emptySpotsCount: 1,
+    boundary: { size: 40 },
     walls: [{ position: [0, 0, -1], args: [13, 1, 0.4] }],
     parkingLayout: [
       {
@@ -309,6 +324,7 @@ export const GAME_LEVELS: GameLevel[] = [
     targetSpots: ["A-6"], // 中等模式常只空一个，这里指定优先 A-6
     silentEmptySpots: ["B-6", "B-5"],
     emptySpotsCount: 1,
+    boundary: { size: 40 },
     walls: [
       { position: [0, 0.5, -4.4], args: [8, 0.8, 0.8] },
       { position: [4.32, 0.5, 0], args: [0.8, 0.8, 8.5] },
@@ -360,6 +376,7 @@ export const GAME_LEVELS: GameLevel[] = [
     spotDepth: 3,
     targetSpots: ["R-1"], // 右侧一列里最靠外那个当目标空位；若游戏里上下反了可改成 R-4
     emptySpotsCount: 1,
+    boundary: { size: 40 },
     // U 形墙：上、下、右三面；左边不封，当入口
     walls: [
       { position: [0, 0.5, -4.2], args: [9, 1, 0.5] },
@@ -417,6 +434,7 @@ export const GAME_LEVELS: GameLevel[] = [
     targetSpots: ["B-4"], // 目标空位
     silentEmptySpots: ["B-3"],
     emptySpotsCount: 1,
+    boundary: { size: 40 },
     // U 形墙：上、下、右三面；左边不封，当入口
     walls: [
       { position: [0, 0, -2.8], args: [13.5, 0.2, 1] },
@@ -473,6 +491,7 @@ export const GAME_LEVELS: GameLevel[] = [
     targetSpots: ["A-6", "A-5", "A-4"], // 中等模式常只空一个，这里指定优先 A-6
     silentEmptySpots: ["B-1", "B-2"],
     emptySpotsCount: 3,
+    boundary: { size: 40 },
     walls: [
       { position: [0, 0.5, -4.1], args: [7.5, 0.3, 0.3] },
       { position: [4.2, 0.5, 0], args: [0.3, 0.3, 8.5] },

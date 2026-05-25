@@ -234,9 +234,10 @@ const GameResultUI = ({
 
             <div
               style={{
-                margin: "8px auto 24px",
-                padding: "6px 16px",
-                width: "fit-content",
+                margin: "8px auto 20px",
+                padding: "8px 16px",
+                width: "100%",
+                boxSizing: "border-box",
                 maxWidth: "100%",
                 borderRadius: 3,
                 border: `1px solid ${subBorder}`,
@@ -251,8 +252,8 @@ const GameResultUI = ({
                 src={`${POPUP_IMG}${isWin ? "win_icon_subtitle.png" : "lose_icon_subtitle.png"}`}
                 alt=""
                 style={{
-                  width: 20,
-                  height: 20,
+                  width: 16,
+                  height: 16,
                   objectFit: "contain",
                   flexShrink: 0,
                   marginTop: 2,
@@ -703,13 +704,13 @@ export const GameHUD: React.FC<GameHUDProps> = ({
       <div
         style={{
           position: "fixed",
-          top: 100,
+          top: 90,
           left: 38,
-          width: 280,
-          height: 140,
+          width: 240,
+          height: 110,
           backgroundImage: `url('./image/Level background.png')`, // 使用你的背景切图
           backgroundSize: "100% 100%",
-          padding: "16px 14px",
+          padding: "14px 14px 16px",
           display: "flex",
           flexDirection: "column",
           gap: 6,
@@ -719,7 +720,7 @@ export const GameHUD: React.FC<GameHUDProps> = ({
         }}
       >
         {/* 1. 关卡标题行 */}
-        <div style={{ display: "flex", alignItems: "baseline", gap: 16 }}>
+        <div style={{ display: "flex", alignItems: "baseline", gap: 14 }}>
           <span
             style={{
               fontSize: 20,
@@ -730,9 +731,9 @@ export const GameHUD: React.FC<GameHUDProps> = ({
           >
             关卡
           </span>
-          <span style={{ fontSize: 24, fontWeight: 800, color: "#FFF8A5" }}>
+          <span style={{ fontSize: 20, fontWeight: 800, color: "#FFF8A5" }}>
             {currentLevel}{" "}
-            <span style={{ color: "rgba(255,255,255,0.3)", fontSize: 18 }}>
+            <span style={{ color: "rgba(255,255,255,0.3)", fontSize: 16 }}>
               / {totalLevels}
             </span>
           </span>
@@ -748,16 +749,16 @@ export const GameHUD: React.FC<GameHUDProps> = ({
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <span style={{ color: "rgba(255,255,255,0.6)", fontSize: 14 }}>
+            <span style={{ color: "rgba(255,255,255,0.6)", fontSize: 12 }}>
               目标
             </span>
-            <span style={{ color: "#FFF8A5", fontSize: 16, fontWeight: 400 }}>
+            <span style={{ color: "#FFF8A5", fontSize: 14, fontWeight: 400 }}>
               {targetSpotId}
             </span>
           </div>
 
           <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-            <span style={{ color: "rgba(255,255,255,0.6)", fontSize: 14 }}>
+            <span style={{ color: "rgba(255,255,255,0.6)", fontSize: 12 }}>
               难度
             </span>
             {[1, 2, 3, 4].map((star) => (
@@ -790,7 +791,7 @@ export const GameHUD: React.FC<GameHUDProps> = ({
               style={{ width: 20, objectFit: "contain" }}
               alt="wallet"
             />
-            <span style={{ fontSize: 16, fontWeight: 400, color: "#fff" }}>
+            <span style={{ fontSize: 14, fontWeight: 400, color: "#fff" }}>
               ¥ {wallet}
             </span>
           </div>
@@ -803,7 +804,7 @@ export const GameHUD: React.FC<GameHUDProps> = ({
             />
             <span
               style={{
-                fontSize: 16,
+                fontSize: 14,
                 fontWeight: 400,
                 color: collisionCount > 0 ? "#ff4d4d" : "#fff",
               }}
