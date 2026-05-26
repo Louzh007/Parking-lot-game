@@ -200,11 +200,11 @@ function CustomParticles({ mode = "showroom" }: { mode?: ParticleSceneMode }) {
 
 // 雾效组件
 function FogEffect({ mode }: { mode: ParticleSceneMode }) {
-  const fogColor = mode === "game" ? "#403731" : "#323438";
+  const fogColor = mode === "game" ? "#201e1c" : "#323438";
   return (
     <fog
       attach="fog"
-      args={[fogColor, 10, 50]} // 颜色，近距离，远距离 
+      args={[fogColor, 10, 40]} // 颜色，近距离，远距离
     />
   );
 }

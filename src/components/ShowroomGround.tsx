@@ -6,6 +6,37 @@ const GROUND_SIZE = 140;
 const GROUND_Y = -0.02;
 const REPOSITION_STEP = 10;
 
+// 地面基础尺寸：改这里会影响整体网格密度。
+const GRID_UNIT = 0.15;
+// 细网格线粗细：越大越粗。
+const FINE_GRID_LINE_WIDTH = 0.0001;
+// 主网格线粗细：越大越粗。
+const MAJOR_GRID_LINE_WIDTH = 0.0001;
+// 发光点大小：越大越明显。
+const DOT_RADIUS = 0.01;
+// 十字标记长度：越大十字越长。
+const CROSS_EXTENT = 0.05;
+// 十字标记粗细：越大十字越粗。
+const CROSS_THICKNESS = 0.0001;
+
+// 亮主网格颜色：这是复制出来的那一层更亮的主网格颜色。
+const BRIGHT_MAJOR_GRID_COLOR = [0.7, 0.9, 2] as const;
+// 亮主网格强度：越大越亮。
+const BRIGHT_MAJOR_GRID_INTENSITY = 0.2;
+// 亮主网格出现概率：越小越稀疏，只有少数几条会亮。
+const BRIGHT_MAJOR_GRID_CHANCE = 0.06;
+
+// 整体颜色和光感：数值越高越亮、越有存在感。
+const BASE_COLOR = [0.01, 0.01, 0.01] as const;
+const FINE_GRID_COLOR = [0.05, 0.05, 0.05] as const;
+const MAJOR_GRID_COLOR = [0.01, 0.02, 0.02] as const;
+const DOT_COLOR = [2, 2, 2] as const;
+const CROSS_COLOR = [1, 1, 1] as const;
+
+function glslVec3(values: readonly [number, number, number]) {
+  return `vec3(${values.join(", ")})`;
+}
+
 const vertexShader = `
   varying vec3 vWorldPosition;
 
@@ -22,10 +53,21 @@ const fragmentShader = `
   uniform vec2 uCameraXZ;
   uniform float uTime;
 
+
+      float gridAxisLine(float coord, float cellSize, float lineWidth) {
+    float distanceToLine = abs(fract(coord / cellSize - 0.5) - 0.5) * cellSize;
+    float aa = max(fwidth(coord) * 1.5, 0.0005);
+    return 1.0 - smoothstep(lineWidth, lineWidth + aa, distanceToLine);
+  }
+
   float gridLine(vec2 worldXZ, float cellSize, float lineWidth) {
-    vec2 cell = abs(fract(worldXZ / cellSize - 0.5) - 0.5) / fwidth(worldXZ / cellSize);
-    float line = min(cell.x, cell.y);
-    return 1.0 - smoothstep(lineWidth, lineWidth + 1.0, line);
+    float lineX = gridAxisLine(worldXZ.x, cellSize, lineWidth);
+    float lineZ = gridAxisLine(worldXZ.y, cellSize, lineWidth);
+    return max(lineX, lineZ);
+  }
+
+  float hash11(float p) {
+    return fract(sin(p * 127.1) * 43758.5453123);
   }
 
   float crossMask(vec2 local, float extent, float thickness) {
@@ -41,29 +83,45 @@ const fragmentShader = `
   void main() {
     vec2 worldXZ = vWorldPosition.xz;
     float distanceToCamera = distance(worldXZ, uCameraXZ);
+    float majorGridSize = ${GRID_UNIT * 6.0};
 
-    float fineGrid = gridLine(worldXZ, 0.45, 0.8);
-    float majorGrid = gridLine(worldXZ, 2.7, 1.1);
+    float fineGrid = gridLine(worldXZ, ${GRID_UNIT}, ${FINE_GRID_LINE_WIDTH});
+    float majorGrid = gridLine(worldXZ, majorGridSize, ${MAJOR_GRID_LINE_WIDTH});
 
-    vec2 dotCell = fract(worldXZ / 5.4) - 0.5;
+    float majorLineX = gridAxisLine(worldXZ.x, majorGridSize, ${MAJOR_GRID_LINE_WIDTH});
+    float majorLineZ = gridAxisLine(worldXZ.y, majorGridSize, ${MAJOR_GRID_LINE_WIDTH});
+    float majorLineIdX = floor(worldXZ.x / majorGridSize);
+    float majorLineIdZ = floor(worldXZ.y / majorGridSize);
+    float brightLineMaskX = step(1.0 - ${BRIGHT_MAJOR_GRID_CHANCE}, hash11(majorLineIdX + 17.0));
+    float brightLineMaskZ = step(1.0 - ${BRIGHT_MAJOR_GRID_CHANCE}, hash11(majorLineIdZ + 53.0));
+    float brightMajorGrid = max(
+      majorLineX * brightLineMaskX,
+      majorLineZ * brightLineMaskZ
+    );
+
+    vec2 dotCell = fract(worldXZ / ${GRID_UNIT * 12}) - 0.5;
     float dotDistance = length(dotCell);
-    float pulse = 0.78 + 0.22 * sin(uTime * 1.35 + floor(worldXZ.x / 5.4) * 0.7 + floor(worldXZ.y / 5.4) * 1.1);
-    float glowDot = smoothstep(0.16, 0.0, dotDistance) * pulse;
+    float pulse = 0.78 + 0.22 * sin(uTime * 1.35 + floor(worldXZ.x / ${GRID_UNIT * 12}) * 0.7 + floor(worldXZ.y / ${GRID_UNIT * 12}) * 1.1);
+    float glowDot = smoothstep(${DOT_RADIUS}, 0.0, dotDistance) * pulse;
 
-    vec2 crossCell = mod(worldXZ + 4.05, 8.1) - 4.05;
-    float cross = crossMask(crossCell, 0.38, 0.02);
+    vec2 crossCell = mod(worldXZ + ${GRID_UNIT * 9}, ${GRID_UNIT * 18}) - ${GRID_UNIT * 9};
+    float cross = crossMask(crossCell, ${CROSS_EXTENT}, ${CROSS_THICKNESS});
 
-    vec3 baseColor = vec3(0.028, 0.036, 0.05);
-    vec3 fineColor = vec3(0.08, 0.13, 0.18) * fineGrid;
-    vec3 majorColor = vec3(0.18, 0.34, 0.48) * majorGrid * 1.6;
-    vec3 dotColor = vec3(3.4, 6.8, 9.5) * glowDot;
-    vec3 crossColor = vec3(1.4, 2.9, 4.4) * cross;
+    vec3 baseColor = ${glslVec3(BASE_COLOR)};
+    vec3 fineColor = ${glslVec3(FINE_GRID_COLOR)} * fineGrid;
+    vec3 majorColor = ${glslVec3(MAJOR_GRID_COLOR)} * majorGrid * 1.6;
+    vec3 brightMajorColor =
+      ${glslVec3(BRIGHT_MAJOR_GRID_COLOR)} *
+      brightMajorGrid *
+      ${BRIGHT_MAJOR_GRID_INTENSITY};
+    vec3 dotColor = ${glslVec3(DOT_COLOR)} * glowDot;
+    vec3 crossColor = ${glslVec3(CROSS_COLOR)} * cross;
 
-    float centerGlow = smoothstep(42.0, 0.0, distanceToCamera) * 0.14;
-    vec3 color = baseColor + fineColor + majorColor + dotColor + crossColor + vec3(centerGlow * 0.12, centerGlow * 0.22, centerGlow * 0.3);
+    float centerGlow = smoothstep(4.0, 0.0, distanceToCamera) * 0.14;
+    vec3 color = baseColor + fineColor + majorColor + brightMajorColor + dotColor + crossColor + vec3(centerGlow * 0.12, centerGlow * 0.22, centerGlow * 0.3);
 
-    float fade = 1.0 - smoothstep(42.0, 66.0, distanceToCamera);
-    float alpha = clamp((fineGrid * 0.22) + (majorGrid * 0.45) + (glowDot * 0.65) + (cross * 0.3) + 0.08, 0.0, 1.0);
+    float fade = 1.0 - smoothstep(4.0, 16.0, distanceToCamera);
+    float alpha = clamp((fineGrid * 0.22) + (majorGrid * 0.45) + (brightMajorGrid * 0.45) + (glowDot * 0.65) + (cross * 0.3) + 0.08, 0.0, 1.0);
     alpha *= fade;
 
     gl_FragColor = vec4(color, alpha);
