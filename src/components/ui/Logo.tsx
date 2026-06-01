@@ -32,8 +32,8 @@ export default function Logo({ style, isGameMode = false }: LogoProps) {
         }
         alt={isGameMode ? "炼狱停车场 logo" : "小米汽车 logo"}
         style={{
-          width: 40,
-          height: 40,
+          width: 32,
+          height: 32,
           objectFit: "contain",
           display: "block",
           flexShrink: 0,
@@ -41,8 +41,8 @@ export default function Logo({ style, isGameMode = false }: LogoProps) {
       />
       <span
         style={{
-          fontSize: 24,
-          fontWeight: 800,
+          fontSize: 20,
+          fontWeight: 600,
           lineHeight: 1,
           letterSpacing: "0.04em",
           whiteSpace: "nowrap",

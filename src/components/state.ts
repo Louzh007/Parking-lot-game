@@ -39,12 +39,6 @@ export const COLORS = [
     url: "./image/carbodycolor_green_u.png",
   },
   {
-    color: "#FFD323",
-    flake: "#FFBE46",
-    perl: "#F7B714",
-    url: "./image/carbodycolor_yellow_u.png",
-  },
-  {
     color: "#0298A6",
     flake: "#39D4F7",
     perl: "#00B9C9",

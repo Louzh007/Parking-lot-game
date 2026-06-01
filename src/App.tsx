@@ -25,6 +25,7 @@ import Huangjing from "./components/huangjing";
 import { GameHUD } from "./components/ui/GameHUD";
 import { GameStartIntro } from "./components/ui/GameStartIntro";
 import { GAME_LEVELS } from "./config/gameLevels";
+import { useMusicController } from "./audio/useMusicController";
 
 /**
  * 开发测试开关：设为 true 时，所有关卡从一开始就视为已解锁，
@@ -39,6 +40,7 @@ function App() {
 
   const [isGameMode, setIsGameMode] = useState(false); // 是否游戏模式（控制 Car 组件 vs GameCar 组件）
   const [gameIntroActive, setGameIntroActive] = useState(false);
+  const [musicMuted, setMusicMuted] = useState(false);
 
   const gameCarRBRef = useRef(null); // 游戏版车辆的刚体引用（传递给 ParkingLevel 组件）
 
@@ -233,9 +235,19 @@ function App() {
   const isSpaceJumpEnabled = Boolean(currentLevelConfig.enableSpaceJump);
 
   // 2. 事件处理：更新WASD按键状态（传递给ControlButtons和Car组件）
-  const handleKeyChange = (key: string, isPressed: boolean) => {
+  const handleKeyChange = useCallback((key: string, isPressed: boolean) => {
     setKeyPressed((prev) => ({ ...prev, [key]: isPressed })); //...prev 是 ES6 中的扩展运算符（spread operator），主要用于复制对象的属性
-  };
+  }, []);
+
+  useMusicController({
+    isGameMode,
+    keyPressed,
+    wheelSpeed,
+    gameResult,
+    isLoading,
+    gameSessionKey: resetKey,
+    isMuted: musicMuted,
+  });
 
   return (
     <div
@@ -382,7 +394,11 @@ function App() {
         maxDisplaySpeed={120}
         style={{ zIndex: 1003 }}
       />
-      <UI showCameraControls={!isGameMode} />
+      <UI
+        showCameraControls={!isGameMode}
+        musicMuted={musicMuted}
+        onToggleMusicMuted={() => setMusicMuted((muted) => !muted)}
+      />
       {/* 入口 UI */}
       {!isGameMode && (
         <div

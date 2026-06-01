@@ -1,8 +1,13 @@
 import { useState } from "react";
 // import { FaShuffle } from "react-icons/fa6";
+import { FaVolumeHigh, FaVolumeXmark } from "react-icons/fa6";
 import { CAMERAS, COLORS, useApp } from "./state";
 
-export function UI({ showCameraControls = true }) {
+export function UI({
+  showCameraControls = true,
+  musicMuted = false,
+  onToggleMusicMuted,
+}) {
   const colorIndex = useApp((state) => state.colorIndex);
   const currentCamera = useApp((state) => state.currentCamera);
 
@@ -188,6 +193,41 @@ export function UI({ showCameraControls = true }) {
               />
             ),
           )}
+
+          <button
+            type="button"
+            aria-label={musicMuted ? "开启音乐" : "静音音乐"}
+            title={musicMuted ? "开启音乐" : "静音音乐"}
+            style={{
+              width: "2rem",
+              height: "2rem",
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              borderRadius: "50%",
+              border: musicMuted
+                ? "1px solid rgba(255, 255, 255, 0.35)"
+                : "1px solid rgba(255, 255, 255, 0.75)",
+              background: musicMuted
+                ? "rgba(24, 24, 24, 0.68)"
+                : "linear-gradient(180deg, rgba(255,255,255,0.22), rgba(255,255,255,0.08))",
+              color: "#fff",
+              cursor: "pointer",
+              pointerEvents: "all",
+              boxShadow: musicMuted
+                ? "none"
+                : "0 0 12px rgba(90, 210, 255, 0.28)",
+              transition:
+                "background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease",
+            }}
+            onClick={onToggleMusicMuted}
+          >
+            {musicMuted ? (
+              <FaVolumeXmark size="1rem" />
+            ) : (
+              <FaVolumeHigh size="1rem" />
+            )}
+          </button>
 
           {/* 下面是随机颜色的按钮 */}
           {/* <span
