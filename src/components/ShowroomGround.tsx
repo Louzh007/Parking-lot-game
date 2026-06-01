@@ -34,13 +34,13 @@ const DISTRESS_MASK_STRENGTH = 0.9;
 const DISTRESS_MASK_MIN_ALPHA = 0.04;
 
 // 亮主网格颜色：这是复制出来的那一层更亮的主网格颜色。
-const BRIGHT_MAJOR_GRID_COLOR = [0.7, 2, 0.8] as const;
+const BRIGHT_MAJOR_GRID_COLOR = [0.7, 0.8, 0.8] as const;
 // 亮主网格强度：越大越亮。
 const BRIGHT_MAJOR_GRID_INTENSITY = 0.1;
 // 亮主网格出现概率：越小越稀疏，只有少数几条会亮。
 const BRIGHT_MAJOR_GRID_CHANCE = 0.06;
 // 第二层亮主网格颜色：比第一层更克制一点，适合做补充。
-const BRIGHT_MAJOR_GRID_COLOR_2 = [0.55, 0.75, 4] as const;
+const BRIGHT_MAJOR_GRID_COLOR_2 = [0.55, 0.75, 0.75] as const;
 // 第二层亮主网格强度。
 const BRIGHT_MAJOR_GRID_INTENSITY_2 = 0.1;
 // 第二层亮主网格出现概率：通常比第一层高一点。

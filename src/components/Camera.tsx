@@ -10,6 +10,10 @@ import {
 } from "three";
 import { CAMERA_VIEWS, useApp } from "./state";
 
+const MAX_SHOWROOM_WHEEL_SPEED = 0.79;
+const MAX_SPEED_CAMERA_DISTANCE_SCALE = 1.2;
+const CAMERA_DISTANCE_LERP = 0.12;
+
 interface CameraProps {
   wheelSpeed: number;
   currentModel: string;
@@ -34,8 +38,10 @@ export function Camera({
   // 相机与车的相对位置
   // 使用 useRef 存储相机偏移，避免状态更新延迟
   const cameraOffsetRef = useRef(new Vector3());
+  const dynamicCameraOffsetRef = useRef(new Vector3());
   const [isCarStationary, setIsCarStationary] = useState(true);
   const isFollowingRef = useRef(false); // 标记是否处于跟随模式
+  const isSettlingCameraRef = useRef(false);
 
   // 标记是否已设置初始位置
   const initializedRef = useRef(false);
@@ -65,6 +71,7 @@ export function Camera({
 
     // 初始化视角索引为 0
     cameraOffsetRef.current.copy(initialOffset);
+    dynamicCameraOffsetRef.current.copy(initialOffset);
     initializedRef.current = true;
   }, [scene, controls]); // 只要场景或控制器准备好，就执行初始化
 
@@ -97,6 +104,7 @@ export function Camera({
           chetoufangxiang,
         );
         cameraOffsetRef.current = rotatedOffset;
+        dynamicCameraOffsetRef.current.copy(rotatedOffset);
       }
     }
 
@@ -128,6 +136,7 @@ export function Camera({
 
     // 保存当前旋转后的偏移，用于车辆移动时跟随
     cameraOffsetRef.current = rotatedOffset;
+    dynamicCameraOffsetRef.current.copy(rotatedOffset);
 
     console.log("相机编号:", currentCamera);
   }, [currentModel, currentCamera]);
@@ -186,12 +195,13 @@ export function Camera({
     // 2. 车辆从运动变为静止时，记录当前相机偏移
     if (chejingzhi && !wasStationary) {
       const cameraPos = camera.getWorldPosition(new Vector3());
-      cameraOffsetRef.current = cameraPos.clone().sub(carPos);
+      dynamicCameraOffsetRef.current.copy(cameraPos.clone().sub(carPos));
       isFollowingRef.current = false;
+      isSettlingCameraRef.current = true;
       // console.log("车辆停止，保存相机偏移:", cameraOffsetRef.current);
 
       // 然后重新启用控制
-      controls.enabled = true;
+      controls.enabled = false;
 
       // console.log("车辆停止，同步相机状态:", cameraPos);
 
@@ -201,13 +211,44 @@ export function Camera({
     // 3. 车辆静止时，允许用户自由操作相机
     if (chejingzhi) {
       // 更新偏移量（用户可能在调整视角）
+      if (isSettlingCameraRef.current) {
+        dynamicCameraOffsetRef.current.lerp(
+          cameraOffsetRef.current,
+          CAMERA_DISTANCE_LERP,
+        );
+
+        const newCameraPos = carPos.clone().add(dynamicCameraOffsetRef.current);
+        controls.setLookAt(
+          newCameraPos.x,
+          newCameraPos.y,
+          newCameraPos.z,
+          carPos.x,
+          carPos.y,
+          carPos.z,
+          true,
+        );
+
+        if (
+          dynamicCameraOffsetRef.current.distanceTo(cameraOffsetRef.current) <
+          0.01
+        ) {
+          dynamicCameraOffsetRef.current.copy(cameraOffsetRef.current);
+          isSettlingCameraRef.current = false;
+          controls.enabled = true;
+        }
+
+        return;
+      }
+
       const cameraPos = camera.getWorldPosition(new Vector3());
       cameraOffsetRef.current = cameraPos.clone().sub(carPos);
+      dynamicCameraOffsetRef.current.copy(cameraOffsetRef.current);
       return;
     }
 
     // 4. 车辆开始运动时，强制相机跟随
     if (!chejingzhi) {
+      isSettlingCameraRef.current = false;
       // console.log("车辆运动中，wheelSpeed:", wheelSpeed);
 
       // 禁用 CameraControls 的用户输入
@@ -217,7 +258,23 @@ export function Camera({
       }
 
       // 计算新的相机位置
-      const newCameraPos = carPos.clone().add(cameraOffsetRef.current);
+      const speedAmount = MathUtils.clamp(
+        Math.abs(wheelSpeed) / MAX_SHOWROOM_WHEEL_SPEED,
+        0,
+        1,
+      );
+      const speedDistanceScale = MathUtils.lerp(
+        1,
+        MAX_SPEED_CAMERA_DISTANCE_SCALE,
+        speedAmount,
+      );
+      const targetOffset = cameraOffsetRef.current
+        .clone()
+        .multiplyScalar(speedDistanceScale);
+
+      dynamicCameraOffsetRef.current.lerp(targetOffset, CAMERA_DISTANCE_LERP);
+
+      const newCameraPos = carPos.clone().add(dynamicCameraOffsetRef.current);
 
       // 直接设置相机位置和目标
 
