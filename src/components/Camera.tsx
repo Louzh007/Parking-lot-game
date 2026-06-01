@@ -242,7 +242,7 @@ export function Camera({
         minPolarAngle={MathUtils.degToRad(1)}
         // 不设置0是因为0就是顶部90度顶视图视角，会和运动方向的计算有bug冲突，会强制往上开，所以调整成了1
         maxPolarAngle={MathUtils.degToRad(90)}
-        maxDistance={25}
+        maxDistance={13}
         minDistance={0.5}
         // onChange={() => regress()}
         // 取消弹性的关键属性

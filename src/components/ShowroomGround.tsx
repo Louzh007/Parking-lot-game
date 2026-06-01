@@ -25,7 +25,7 @@ const DISTRESS_MASK_SCALE = 0.5;
 // 细节颗粒缩放：数值越小，细碎噪点越少越柔；数值越大，边缘和空缺处的颗粒感越明显。
 const DISTRESS_MASK_DETAIL_SCALE = 0.95;
 // 遮罩开始显现阈值：数值越低，保留下来的地面越多；数值越高，更多区域会被压暗或隐藏。
-const DISTRESS_MASK_LOW = 0.5;
+const DISTRESS_MASK_LOW = 0.2;
 // 遮罩完全显现阈值：数值越低，明暗对比越硬、完整区域更多；数值越高，过渡更长、更雾化。
 const DISTRESS_MASK_HIGH = 0.6;
 // 遮罩作用强度：0 等于不使用斑驳遮罩，1 等于完整使用遮罩；越大地面断裂感越强。

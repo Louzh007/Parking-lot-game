@@ -84,7 +84,7 @@ const Car = ({
 
   // 车辆状态管理
 
-  const jiasudu = 0.006; // 加速度
+  const jiasudu = 0.008; // 加速度
   const MAX_WHEEL_SPEED = 0.79; // 最大转速
   const friction = 0.95; // 摩擦力（减速用）
   const TURN_ANGLE = 0.01; //设置轮胎旋转角度
