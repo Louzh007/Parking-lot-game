@@ -19,6 +19,20 @@ const CROSS_EXTENT = 0.02;
 // 十字标记粗细：越大十字越粗。
 const CROSS_THICKNESS = 0.0001;
 
+// 地面斑驳遮罩：用世界坐标噪声打散网格，让地面局部若隐若现。
+// 斑驳主纹理缩放：数值越小，斑块越大、过渡越开阔；数值越大，斑块越密、变化越碎。
+const DISTRESS_MASK_SCALE = 0.5;
+// 细节颗粒缩放：数值越小，细碎噪点越少越柔；数值越大，边缘和空缺处的颗粒感越明显。
+const DISTRESS_MASK_DETAIL_SCALE = 0.95;
+// 遮罩开始显现阈值：数值越低，保留下来的地面越多；数值越高，更多区域会被压暗或隐藏。
+const DISTRESS_MASK_LOW = 0.5;
+// 遮罩完全显现阈值：数值越低，明暗对比越硬、完整区域更多；数值越高，过渡更长、更雾化。
+const DISTRESS_MASK_HIGH = 0.6;
+// 遮罩作用强度：0 等于不使用斑驳遮罩，1 等于完整使用遮罩；越大地面断裂感越强。
+const DISTRESS_MASK_STRENGTH = 0.9;
+// 最低透明度保留量：数值越低，消失区域越接近完全看不见；数值越高，暗处仍会保留一层淡淡网格。
+const DISTRESS_MASK_MIN_ALPHA = 0.04;
+
 // 亮主网格颜色：这是复制出来的那一层更亮的主网格颜色。
 const BRIGHT_MAJOR_GRID_COLOR = [0.7, 2, 0.8] as const;
 // 亮主网格强度：越大越亮。
@@ -74,6 +88,44 @@ const fragmentShader = `
 
   float hash11(float p) {
     return fract(sin(p * 127.1) * 43758.5453123);
+  }
+
+  float hash21(vec2 p) {
+    p = fract(p * vec2(123.34, 456.21));
+    p += dot(p, p + 45.32);
+    return fract(p.x * p.y);
+  }
+
+  float valueNoise(vec2 p) {
+    vec2 cell = floor(p);
+    vec2 local = fract(p);
+    local = local * local * (3.0 - 2.0 * local);
+
+    float bottom = mix(hash21(cell), hash21(cell + vec2(1.0, 0.0)), local.x);
+    float top = mix(hash21(cell + vec2(0.0, 1.0)), hash21(cell + vec2(1.0, 1.0)), local.x);
+    return mix(bottom, top, local.y);
+  }
+
+  float fbm(vec2 p) {
+    float value = 0.0;
+    float amplitude = 0.5;
+
+    for (int i = 0; i < 5; i++) {
+      value += amplitude * valueNoise(p);
+      p = p * 2.03 + vec2(17.13, 9.27);
+      amplitude *= 0.5;
+    }
+
+    return value;
+  }
+
+  float distressedGroundMask(vec2 worldXZ) {
+    float broadWear = fbm(worldXZ * ${DISTRESS_MASK_SCALE} + vec2(12.4, 5.7));
+    float midWear = fbm(worldXZ * ${DISTRESS_MASK_SCALE * 2.8} + vec2(41.2, 19.6));
+    float grain = valueNoise(worldXZ * ${DISTRESS_MASK_DETAIL_SCALE} + vec2(3.3, 71.8));
+    float wear = broadWear * 0.66 + midWear * 0.25 + grain * 0.09;
+    float mask = smoothstep(${DISTRESS_MASK_LOW}, ${DISTRESS_MASK_HIGH}, wear);
+    return mix(${DISTRESS_MASK_MIN_ALPHA}, 1.0, mix(1.0, mask, ${DISTRESS_MASK_STRENGTH}));
   }
 
   float isolatedLineMask(float lineId, float seed, float chance) {
@@ -179,7 +231,10 @@ const fragmentShader = `
 
     float fade = 1.0 - smoothstep(4.0, 16.0, distanceToCamera);
     float alpha = clamp((fineGrid * 0.22) + (majorGrid * 0.45) + (brightMajorGrid * 0.45) + (brightMajorGrid2 * 0.28) + (glowDot * 0.65) + (cross * 0.3) + 0.08, 0.0, 1.0);
+    float distressMask = distressedGroundMask(worldXZ);
+    alpha *= distressMask;
     alpha *= fade;
+    color *= 0.45 + distressMask * 0.55;
 
     gl_FragColor = vec4(color, alpha);
   }

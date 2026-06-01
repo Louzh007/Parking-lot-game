@@ -60,34 +60,36 @@ export function UI({ showCameraControls = true }) {
             {CAMERAS.map((text, i) => {
               const isActive = currentCamera === i;
               return (
-              <button
-                key={i}
-                style={{
-                  padding: "0.5rem 0.5rem",
-                  minWidth: "4.5rem",
-                  cursor: "pointer",
-                  pointerEvents: "all",
-                  borderRadius: "10px",
-                  border: isActive ? "3px solid #FFF" : "3px solid transparent",
-                  background: isActive
-                    ? "linear-gradient(180deg, #E8E8E8 0%, #FEFEFE 100%)"
-                    : "#555",
-                  color: isActive ? "#000" : "#fff",
-                  boxShadow: isActive
-                    ? "0 2.698px 2.923px -1.349px rgba(0, 0, 0, 0.25)"
-                    : "none",
-                  transition:
-                    "background 0.3s, color 0.3s, box-shadow 0.3s, border-color 0.3s",
-                }}
-                onClick={() =>
-                  useApp.setState((state) => ({
-                    currentCamera: i,
-                  }))
-                }
-              >
-                {text}
-              </button>
-            );
+                <button
+                  key={i}
+                  style={{
+                    padding: "0.5rem 0.5rem",
+                    minWidth: "4.5rem",
+                    cursor: "pointer",
+                    pointerEvents: "all",
+                    borderRadius: "10px",
+                    border: isActive
+                      ? "3px solid #FFF"
+                      : "3px solid transparent",
+                    background: isActive
+                      ? "linear-gradient(180deg, #E8E8E8 0%, #FEFEFE 100%)"
+                      : "#555",
+                    color: isActive ? "#000" : "#fff",
+                    boxShadow: isActive
+                      ? "0 2.698px 2.923px -1.349px rgba(0, 0, 0, 0.25)"
+                      : "none",
+                    transition:
+                      "background 0.3s, color 0.3s, box-shadow 0.3s, border-color 0.3s",
+                  }}
+                  onClick={() =>
+                    useApp.setState((state) => ({
+                      currentCamera: i,
+                    }))
+                  }
+                >
+                  {text}
+                </button>
+              );
             })}
           </div>
         </div>
@@ -128,7 +130,7 @@ export function UI({ showCameraControls = true }) {
           pointerEvents: "none",
         }}
       >
-        <h3
+        {/* <h3
           style={{
             fontFamily: '"Bricolage Grotesque", sans-serif',
             color: "#fff",
@@ -141,7 +143,7 @@ export function UI({ showCameraControls = true }) {
           }}
         >
           车漆选择
-        </h3>
+        </h3> */}
         <div
           style={{
             // width: "100%",
