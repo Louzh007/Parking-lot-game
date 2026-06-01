@@ -13,6 +13,10 @@ import { CAMERA_VIEWS, useApp } from "./state";
 const MAX_SHOWROOM_WHEEL_SPEED = 0.79;
 const MAX_SPEED_CAMERA_DISTANCE_SCALE = 1.2;
 const CAMERA_DISTANCE_LERP = 0.12;
+const ENABLE_CAMERA_SHAKE = false; // 改成 true 即可重新启用速度镜头抖动
+const CAMERA_SHAKE_START_SPEED_AMOUNT = 0.5; // 速度达到最大速度的 35% 后开始加入轻微抖动
+const MAX_CAMERA_SHAKE_OFFSET = 0.015; // 抖动最大位移幅度，数值越大镜头震动越明显
+const CAMERA_SHAKE_FREQUENCY = 50; // 抖动频率，数值越大震动越密集
 
 interface CameraProps {
   wheelSpeed: number;
@@ -179,7 +183,7 @@ export function Camera({
     }
   }, [camera]);
 
-  useFrame(() => {
+  useFrame((state) => {
     if (!carRef.current || !controls || !camera) return;
 
     const carPos = carRef.current.getWorldPosition(new Vector3());
@@ -274,7 +278,26 @@ export function Camera({
 
       dynamicCameraOffsetRef.current.lerp(targetOffset, CAMERA_DISTANCE_LERP);
 
-      const newCameraPos = carPos.clone().add(dynamicCameraOffsetRef.current);
+      const cameraShake = new Vector3();
+      if (ENABLE_CAMERA_SHAKE) {
+        const shakeAmount = MathUtils.smoothstep(
+          speedAmount,
+          CAMERA_SHAKE_START_SPEED_AMOUNT,
+          1,
+        );
+        const shakeOffset = MAX_CAMERA_SHAKE_OFFSET * shakeAmount;
+        const shakeTime = state.clock.elapsedTime * CAMERA_SHAKE_FREQUENCY;
+        cameraShake.set(
+          0,
+          Math.sin(shakeTime) * shakeOffset,
+          Math.cos(shakeTime * 1.37) * shakeOffset * 0.25,
+        );
+      }
+
+      const newCameraPos = carPos
+        .clone()
+        .add(dynamicCameraOffsetRef.current)
+        .add(cameraShake);
 
       // 直接设置相机位置和目标
 
