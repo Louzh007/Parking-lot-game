@@ -247,6 +247,9 @@ function App() {
     isLoading,
     gameSessionKey: resetKey,
     isMuted: musicMuted,
+    collisionCount,
+    gameIntroActive,
+    gameBgmSrc: currentLevelConfig.bgm,
   });
 
   return (

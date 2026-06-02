@@ -58,6 +58,22 @@ const Car = ({
 
   // 正确的状态监听
   const colorIndex = useApp((state) => state.colorIndex);
+  const colorIndexRef = useRef(colorIndex);
+  colorIndexRef.current = colorIndex;
+
+  const applyPaintColor = useCallback((targetColor) => {
+    if (carbodyMaterialsRef.current.length === 0 || !targetColor) return;
+
+    requestAnimationFrame(() => {
+      carbodyMaterialsRef.current.forEach((material) => {
+        material.setColors(
+          targetColor.color,
+          targetColor.perl,
+          targetColor.flake,
+        );
+      });
+    });
+  }, []);
 
   // 定义流光配置映射
   const flowConfig = {
@@ -312,12 +328,16 @@ const Car = ({
       // 处理glb中是单个或多个材质的情况，统一转换成数组并过滤无效值
       let materials;
       if (Array.isArray(node.material)) {
-        materials = node.material.filter((m) => m != null); // 过滤数组中的null/undefined
+        materials = node.material
+          .map((material, materialIndex) => ({ material, materialIndex }))
+          .filter(({ material }) => material != null); // 过滤数组中的null/undefined
       } else {
-        materials = node.material ? [node.material] : []; // 单个材质存在才包装成数组
+        materials = node.material
+          ? [{ material: node.material, materialIndex: 0 }]
+          : []; // 单个材质存在才包装成数组
       }
 
-      materials.forEach((material) => {
+      materials.forEach(({ material, materialIndex }) => {
         // 捕获车身材质
         if (material.name === "Car_body") {
           // 存储原始材质到节点的 userData 中
@@ -357,8 +377,9 @@ const Car = ({
         }
       });
     });
+    applyPaintColor(COLORS[colorIndexRef.current]);
     // console.log(`找到 ${carbodyMaterialsRef.current.length} 个车身材质`);
-  }, [currentModel]); // 模型加载完成后执行, currentModel变化时重新执行
+  }, [applyPaintColor, currentModel]); // 模型加载完成后执行, currentModel变化时重新执行
 
   // 2. 监听模型加载状态的正确方式
   const [loadingStarted, setLoadingStarted] = useState(false); // 避免重复启动加载
@@ -411,21 +432,8 @@ const Car = ({
   // 3.1监听颜色切换，更新车身材质（核心：与状态联动）
   // 优化材质更新逻辑
   useEffect(() => {
-    const targetColor = COLORS[colorIndex];
-
-    if (carbodyMaterialsRef.current.length > 0 && targetColor) {
-      // 批量更新，减少不必要的循环
-      requestAnimationFrame(() => {
-        carbodyMaterialsRef.current.forEach((material) => {
-          material.setColors(
-            targetColor.color,
-            targetColor.perl,
-            targetColor.flake,
-          );
-        });
-      });
-    }
-  }, [colorIndex]); // 仅在 colorIndex 变化时更新
+    applyPaintColor(COLORS[colorIndex]);
+  }, [applyPaintColor, colorIndex]); // 仅在 colorIndex 变化时更新
 
   //3.2 汽车车尾灯材质变化
   useEffect(() => {

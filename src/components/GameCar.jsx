@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect, useMemo } from "react";
+import { useCallback, useRef, useState, useEffect, useMemo } from "react";
 import { useGLTF, Html } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { Vector3 } from "three";
@@ -122,6 +122,22 @@ const GameCar = ({
   }, [activeHullRoot]);
 
   const colorIndex = useApp((state) => state.colorIndex);
+  const colorIndexRef = useRef(colorIndex);
+  colorIndexRef.current = colorIndex;
+
+  const applyPaintColor = useCallback((targetColor) => {
+    if (carbodyMaterialsRef.current.length === 0 || !targetColor) return;
+
+    requestAnimationFrame(() => {
+      carbodyMaterialsRef.current.forEach((material) => {
+        material.setColors(
+          targetColor.color,
+          targetColor.perl,
+          targetColor.flake,
+        );
+      });
+    });
+  }, []);
 
   // 车辆参数
   const jiasudu = 0.003;
@@ -226,23 +242,13 @@ const GameCar = ({
         visitMaterial(node.material, 0);
       }
     });
-  }, [currentModel]);
+    applyPaintColor(COLORS[colorIndexRef.current]);
+  }, [applyPaintColor, currentModel]);
 
   // 颜色切换
   useEffect(() => {
-    const targetColor = COLORS[colorIndex];
-    if (carbodyMaterialsRef.current.length > 0 && targetColor) {
-      requestAnimationFrame(() => {
-        carbodyMaterialsRef.current.forEach((material) => {
-          material.setColors(
-            targetColor.color,
-            targetColor.perl,
-            targetColor.flake,
-          );
-        });
-      });
-    }
-  }, [colorIndex]);
+    applyPaintColor(COLORS[colorIndex]);
+  }, [applyPaintColor, colorIndex]);
 
   // 尾灯/大灯
   useEffect(() => {

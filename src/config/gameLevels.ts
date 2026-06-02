@@ -169,6 +169,8 @@ export interface GameLevel {
   /** 失败结算弹窗副文案（提示框内） */
   loseSubText: string;
   timeLimitSec: number; // 本关倒计时（秒）
+  /** 本关车辆启动后播放的 BGM；不写则使用默认游戏 BGM */
+  bgm?: string;
   wallet: number; // 开局「罚款额度」有多少钱
   penaltyPerHit: number; // 撞一次扣多少钱
   initialPos: [number, number, number]; // 玩家车出生位置
@@ -225,8 +227,9 @@ export const GAME_LEVELS: GameLevel[] = [
     winText: "AUV 我就知道你可以的",
     loseText: "你会玩个刁",
     winSubText: "这还是国内吗，哪还有这么宽的车位啊",
-    loseSubText: "这种车位不是闭着眼睛停的吗",
+    loseSubText: "这种不是闭着眼睛停吗",
     timeLimitSec: 60,
+    bgm: "/BGM/TokyoDrift.mp3",
     wallet: 5000,
     penaltyPerHit: 1000,
     initialPos: [0, 0, 10], // 在中间准备倒车
@@ -274,9 +277,10 @@ export const GAME_LEVELS: GameLevel[] = [
     difficultyStars: 2,
     winText: "就这样吧，算你过了",
     loseText: "不是，这都倒不进去吗",
-    winSubText: "侧方停车是我永远的痛 第一次出险就给了ta",
+    winSubText: "TM 第一次出险就给了侧方停车",
     loseSubText: "小胡，明年保费给他涨个5000",
     timeLimitSec: 100,
+    bgm: "/BGM/huantaipingyang.mp3",
     wallet: 3000,
     penaltyPerHit: 1000,
     initialPos: [0, 0, 8], // 偏一点出生，方便进车位
@@ -315,6 +319,7 @@ export const GAME_LEVELS: GameLevel[] = [
     winSubText: "有点东西啊",
     loseSubText: "理他做什么，想停哪停哪",
     timeLimitSec: 90,
+    bgm: "/BGM/lixiang.mp3",
     wallet: 3000,
     penaltyPerHit: 1000,
     initialPos: [0, 0, 8], // 偏一点出生，方便进车位
@@ -368,6 +373,7 @@ export const GAME_LEVELS: GameLevel[] = [
     winSubText: "这种车位我一般也不停",
     loseSubText: "你先打方向，然后再踩油门啊",
     timeLimitSec: 100,
+    bgm: "/BGM/AE86.mp3",
     wallet: 3000,
     penaltyPerHit: 2000,
     initialPos: [-9, 0, 0], // 左侧开口，从左边开进场地
@@ -426,6 +432,7 @@ export const GAME_LEVELS: GameLevel[] = [
     winSubText: "小胡，明年保费给他涨个5000",
     loseSubText: "小胡，明年保费给他涨个2000",
     timeLimitSec: 100,
+    bgm: "/BGM/TokyoDrift.mp3",
     wallet: 3000,
     penaltyPerHit: 2000,
     initialPos: [-10, 0, 0], // 左侧开口，从左边开进场地
@@ -481,6 +488,7 @@ export const GAME_LEVELS: GameLevel[] = [
     winSubText: "有点东西啊",
     loseSubText: "你故意找茬是吧",
     timeLimitSec: 90,
+    bgm: "/BGM/F1.mp3",
     wallet: 3000,
     penaltyPerHit: 3000,
     initialPos: [0, 0, 8], // 偏一点出生，方便进车位
